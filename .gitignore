@@ -1,0 +1,21 @@
+# Environment and credentials
+.env
+q1k/
+tests/test_csv/2_consents.csv
+
+# data 
+scripts/csv
+scripts/json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Pytest
+.pytest_cache/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
