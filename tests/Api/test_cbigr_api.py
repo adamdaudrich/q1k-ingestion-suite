@@ -91,7 +91,7 @@ def test_post_diagnosis():
 
     # Test data
     test_diagnosis = {
-        'PSCID': 'Q1K0001076',
+        'PSCID': 'Q1K0000002',
         'Diagnosis': 'Ataxia',
         'Familial': None,
         'Comment': 'Test comment'

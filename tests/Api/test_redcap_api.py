@@ -9,7 +9,8 @@ from utils.redcap_api import (
     fetch_consents,
     fetch_diagnosis,
     fetch_family_relationship,
-    fetch_session
+    get_record_id_external_id,
+    get_sessions
 )
 from utils.config import Config
 from utils.both_api import get_diagnosis
@@ -17,13 +18,15 @@ from utils.both_api import get_diagnosis
 REDCAP_TOKEN = Config.REDCAP_TOKEN
 REDCAP_URL = Config.REDCAP_URL
 
-def validate_token():
+def test_validate_token():
     """Test that REDCap API token is valid"""
     data = {
         'token': REDCAP_TOKEN,
         'content': 'project',
         'format': 'json'
     }
+
+    print(data)
     
     response = requests.post(REDCAP_URL, data=data, timeout=30)
     response.raise_for_status()
@@ -31,7 +34,7 @@ def validate_token():
     if not response.json():
         raise ValueError("Invalid REDCap API token")
 
-    return True
+    return None
 
 def test_fetch_identifiers():
     """Test"""
@@ -114,7 +117,7 @@ def test_get_diagnoses():
     print(type(diagnoses))
     print(f"THE AMOUNT OF DIAGNOSES IS {len(diagnoses)}")
 
-    for i in diagnoses[:10]:
+    for i in diagnoses[:5]:
         print(i, end= '\n')
 
 def test_get_record_id_external_id():
@@ -142,18 +145,18 @@ def test_fetch_family_relationship():
     for i in records[10:20]:
         print(i)
 
-def test_fetch_session():
-    """Test"""
-    records = fetch_session()
+def test_get_sessions():
 
-    assert records is not None
-    print(f'THE AMOUNT OF RECORDS IS {len(records)}')
+    sessions = get_sessions()
+    assert sessions is not None
+    assert len(sessions) > 0
+    for i in sessions[0:3]:
+        print(i)
 
-    for r in records[:3]:
-        print(r, end ='\n') 
+    return None
 
 if __name__ == "__main__":
-    validate_token()
+    test_validate_token()
     test_fetch_identifiers()
     test_fetch_consents()
     test_fetch_registration()
@@ -161,4 +164,5 @@ if __name__ == "__main__":
     test_get_diagnoses()
     test_get_record_id_external_id()
     test_fetch_family_relationship()
-    test_fetch_session()
+    test_get_sessions()
+ 

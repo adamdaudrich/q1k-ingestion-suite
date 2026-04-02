@@ -56,6 +56,20 @@ def get_study_id(record):
 
     return merged_id.replace('_', '-')
 
+def get_record_id_external_id():
+    """
+    Extract record_id and study_id from fetch_identifiers
+    """
+
+    identifiers = fetch_identifiers()
+
+    recordid_extid = {}
+    for i in identifiers():
+        record_id = i.get('record_id', '')
+        ext_id = get_study_id(i) 
+        recordid_extid[record_id] = ext_id
+
+    return recordid_extid    
 
 def fetch_registration():
     """Fetch registration data from REDCap API"""
@@ -133,27 +147,18 @@ def fetch_diagnosis():
         'fields[0]': 'record_id',
         'fields[1]': 'q1k_proband_id_1',
         'fields[2]': 'q1k_relative_idgenerated_1',
-        'fields[3]': 'cfq_diag_asd',
-        'fields[4]': 'cfq_diag_id',
-        'fields[5]': 'cfq_diag_adhd',
-        'fields[6]': 'cfq_diag_fasd',
-        'fields[7]': 'cfq_diag_ld',
-        'fields[8]': 'cfq_diag_lcd',
-        'fields[9]': 'cfq_diag_md',
-        'fields[10]': 'cfq_diag_other',
-        'fields[11]': 'cfq_ment_ad',
-        'fields[12]': 'cfq_ment_dd',
-        'fields[13]': 'cfq_ment_bd',
-        'fields[14]': 'cfq_ment_ocd',
-        'fields[15]': 'cfq_ment_ts',
-        'fields[16]': 'cfq_ment_psyep',
-        'fields[17]': 'cfq_ment_schizo',
-        'fields[18]': 'cfq_ment_sa',
-        'fields[19]': 'cfq_ment_epilepsy',
-        'fields[20]': 'cfq_ment_hearing_disability',
-        'fields[21]': 'cfq_ment_visual_disability',
-        'fields[22]': 'cfq_ment_physical_disability',
-        'fields[23]': 'cfq_ment_genetic_disorder'         
+        'fields[3]': 'reg_diag_asd',
+        'fields[4]': 'reg_diag_intel',
+        'fields[5]': 'reg_diag_adhd',
+        'fields[6]': 'reg_diag_fas',
+        'fields[7]': 'reg_diag_learn',
+        'fields[8]': 'reg_diag_comm',
+        'fields[9]': 'reg_diag_motor',
+        'fields[10]': 'reg_diag_hearing',
+        'fields[11]': 'reg_diag_visual',
+        'fields[12]': 'reg_diag_phys',
+        'fields[13]': 'reg_diag_gene',
+        'fields[14]': 'diag_oth',     
     }
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)
@@ -189,7 +194,6 @@ def fetch_family_relationship():
 def fetch_session():
     """ 
     Fetch site, ev_status, and ids of the participant
-
     """
     params = {
         'token': REDCAP_TOKEN,
@@ -214,3 +218,35 @@ def fetch_session():
     response = requests.post(REDCAP_URL, data=params, timeout=10)
     response.raise_for_status()
     return response.json()
+
+def get_sessions():
+    """
+    get cohorts and sites for all candidates for eventual
+    db session inserts
+    """
+
+    session_data = fetch_session()
+
+    sessions = {}
+    for s in session_data:
+        record_id = s.get("record_id")
+        cohort_value = s.get("ev_status")
+        proband_value = s.get("")
+        
+        #get proband value as well
+        if proband_value == "" and cohort_value = "" or Null
+            cohort = "Affected"
+
+        elif proband_value == "" and cohort_value == '0':
+            cohort = 'Affected'
+        elif proband_value == "" and cohort_value == "1":
+            cohort = 'Not Affected'
+
+        site = s.get("q1k_adminsite_1")
+
+        session_data[record_id] = {
+            "cohort": cohort, 
+            "site": site
+        } 
+
+    return sessions

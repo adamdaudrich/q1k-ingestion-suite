@@ -66,26 +66,18 @@ def get_diagnosis():
     extracted_candidates = get_candidates()
 
     diagnosis_mapping = {
-        'Autism Spectrum Disorder': 'cfq_diag_asd',
-        'Intellectual Disability': 'cfq_diag_id',
-        'Attention Deficit Hyperactivity Disorder': 'cfq_diag_adhd',
-        'Fetal Alcohol Syndrome Disorder': 'cfq_diag_fasd',
-        'Learning Disability': 'cfq_diag_ld',
-        'Language and Communication Disorder': 'cfq_diag_lcd',
-        'Motor Disorder': 'cfq_diag_md',
-        'Anxiety Disorder': 'cfq_ment_bd',
-        'Depression Disorder': 'cfq_ment_ocd',
-        'Bipolar Disorder': 'cfq_ment_bd', 
-        'Obsessive Compulsive Disorder': 'cfq_ment_ocd', 
-        "Tourettes Syndrome": 'cfq_ment_ts',
-        'Psychosis Episodes': 'cfq_ment_psyep',
-        'Schizophrenia': 'cfq_ment_schizo',
-        'Substance Abuse': 'cfq_ment_sa',
-        'Epilepsy': 'cfq_ment_epilepsy',
-        'Hearing Disability': 'cfq_ment_hearing_disability',
-        'Visual Disability': 'cfq_ment_visual_disability',
-        'Physical Disability': 'cfq_ment_physical_disability',
-        'Genetic Disorder': 'cfq_ment_genetic_disorder'
+        'Autism Spectrum Disorder': 'reg_diag_asd',
+        'Intellectual Disability': 'reg_diag_intel',
+        'Attention Deficit Hyperactivity Disorder': 'reg_diag_adhd',
+        'Fetal Alcohol Syndrome Disorder': 'reg_diag_fas',
+        'Learning Disability': 'reg_diag_learn',
+        'Language and Communication Disorder': 'reg_diag_comm',
+        'Motor Disorder': 'reg_diag_motor',
+        'Hearing Disability': 'reg_diag_hearing'
+        'Visual Disability': 'diag_visual',
+        'Physical Disability': 'reg_diag_phys',
+        'Genetic Disorder': 'reg_diag_gene',
+        'Other': 'reg_diag_oth'
     }
 
     diagnoses = []
@@ -94,17 +86,25 @@ def get_diagnosis():
         merged_id = get_study_id(r)
 
         for c in extracted_candidates:
-            pscid = c.get('pscid')
-            if c['extid'] == merged_id:
+            pscid = c.get('PSCID')
+            if c['ExtStudyID_Q1K'] == merged_id:
 
                 for name, field in diagnosis_mapping.items():
-                    if field and r.get(field) == '1':
+                    if r.get(field) == '1':
                         diagnoses.append({
                             'PSCID': pscid,
                             'Diagnosis': name,
                             'Familial': None,  
-                            'Comment': None    
+                            'Comment': 'Suspected Diagnosis'    
+                        })
+
+                    elif r.get(field) == '2':
+                        diagnoses.append({
+                            'PSCID': pscid,
+                            'Diagnosis': name,
+                            'Familial': None,
+                            'Comment' : 'Confirmed Diagnosis'
                         })
                 break
+            
     return diagnoses
-
