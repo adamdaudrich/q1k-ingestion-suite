@@ -6,8 +6,11 @@ from utils.config import Config
 from utils.cbigr_api import (
     authenticate,
     fetch_candidates,
-    get_candidates
+    get_candidates,
+    extract_pscid_extid,
 )
+
+from utils.bids import match_subid_to_pscid
 
 def test_authenticate():
     """
@@ -58,6 +61,7 @@ def test_fetch_candidates():
     """
     Test gives you a list of dicts
     """
+    
     response = fetch_candidates()
     assert response.status_code == 200
     candidates = response.json()
@@ -75,6 +79,33 @@ def test_get_candidates():
     print(f' TOTAL Accessed Candidates: {len(extracted_candidates)}')
     print(extracted_candidates[0])
     print(extracted_candidates[-1])
+
+
+def test_extract_pscid_extid():
+    """
+    Test
+    """
+
+    pscid_extid = extract_pscid_extid()
+    assert pscid_extid is not None
+    assert len(pscid_extid) > 0
+    print(pscid_extid[0])
+    print(pscid_extid[-1])
+
+    return None
+
+def test_match_subid_to_extid():
+    """
+    Test the build of the pscid subid dict
+    """
+
+    pscid_subid = match_subid_to_pscid()
+    assert pscid_subid is not None
+    assert len(pscid_subid) > 0
+    print(pscid_subid[0])
+    print(pscid_subid[-1])
+
+    return None
 
 def test_post_diagnosis():
     """

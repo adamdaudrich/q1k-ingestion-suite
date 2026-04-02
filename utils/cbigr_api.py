@@ -107,23 +107,22 @@ def get_candidates():
 
 def extract_pscid_extid():
     """
-    Make a dict with PSCID and ExtStudyID
+    Make a dict with PSCID and ExtStudyID by filtering extractef_candidates
     Returns: dict
     """
 
-    candidates = fetch_candidates()
-    candidates_data = candidates.json()
+    extracted_candidates = get_candidates()
     
     pscid_extid = []
 
-    for i in candidates_data['Candidates']:
+    for i in extracted_candidates:
             pscid = i['PSCID']
-            ext_study_ids = i['ExtStudyIDs']
+            ext_study_ids = i['ExtStudyID_Q1K']
 
             if ext_study_ids is not None or '':
                 record = {
                     'pscid': pscid, 
-                    'extid': ext_study_ids['Q1K']
+                    'extid': ext_study_ids
                 }
                 pscid_extid.append(record)
 

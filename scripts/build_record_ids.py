@@ -51,19 +51,6 @@ def main():
     """
     ids = get_cand_id_record_id()
     
-    # record_ids = []
-
-    # for c in combo_id:
-    #     record_id = c.get('record_id')
-    #     cand_id = c.get('CandID')
-
-    #     id_data = {
-    #         'CandID' : cand_id,
-    #         'Record ID': record_id,
-    #     }
-        
-    #     record_ids.append(id_data)
-
     write_record_id_csv(ids)
 
 if __name__ == "__main__":
