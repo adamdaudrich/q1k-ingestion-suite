@@ -87,8 +87,8 @@ def test_get_loris_ids():
     """
 
     loris_ids = get_loris_ids()
-    assert loris_ids is not None
-    assert len(loris_ids) > 0
+    assert isinstance(loris_ids, list)
+    #assert isinstance(loris_ids, int)
     print(loris_ids[0])
     print(loris_ids[-1])
 
