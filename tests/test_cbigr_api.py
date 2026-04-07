@@ -7,10 +7,10 @@ from utils.cbigr_api import (
     authenticate,
     fetch_candidates,
     get_candidates,
-    extract_pscid_extid,
+    get_loris_ids,
 )
 
-from utils.bids import match_subid_to_pscid
+# from utils.bids import match_subid_to_pscid
 
 def test_authenticate():
     """
@@ -81,16 +81,16 @@ def test_get_candidates():
     print(extracted_candidates[-1])
 
 
-def test_extract_pscid_extid():
+def test_get_loris_ids():
     """
     Test
     """
 
-    pscid_extid = extract_pscid_extid()
-    assert pscid_extid is not None
-    assert len(pscid_extid) > 0
-    print(pscid_extid[0])
-    print(pscid_extid[-1])
+    loris_ids = get_loris_ids()
+    assert loris_ids is not None
+    assert len(loris_ids) > 0
+    print(loris_ids[0])
+    print(loris_ids[-1])
 
     return None
 
@@ -144,4 +144,5 @@ if __name__ == "__main__":
     test_authenticate()
     test_fetch_candidates()
     test_get_candidates()
+    test_get_loris_ids()
     test_post_diagnosis()

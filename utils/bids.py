@@ -2,7 +2,7 @@
 Operations on BIDS directory
 """
 
-from utils.cbigr_api import extract_pscid_extid
+from utils.cbigr_api import get_loris_ids
 from config import MERGED_BIDS, RENAMED_BIDS
 import os
 
@@ -25,7 +25,7 @@ def match_subid_to_pscid():
     return dict of PSCID: SubID
     """
 
-    pscid_extid = extract_pscid_extid()
+    pscid_extid = get_loris_ids()
 
     pscid_subid = {}
     for k, v in pscid_extid.items():

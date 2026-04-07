@@ -38,7 +38,8 @@ def get_personal_fields(record):
 
 def get_study_id(record):
     """
-    Extract, merge and format the study ID from REDcap required by CBIGR new_profile
+    Extract, merge and format the Q1K key ID (ex: "Q1K-HSJ-100119-P") from REDcap 
+    Return: str
     """
     proband_id = record.get('q1k_proband_id_1', '')
     relative_id = record.get('q1k_relative_idgenerated_1', '')
@@ -50,6 +51,7 @@ def get_study_id(record):
 def get_site_from_id(merged_id):
     """
     Extract the site required by CBIGR new_profile from study ID substring
+    Return: str
     """
     if len(merged_id) < 7:
         return ''
@@ -66,15 +68,6 @@ def get_site_from_id(merged_id):
 
     return site_map.get(site_code, '')
 
-def filter_non_consented_participants(record):
-    """
-    Remove participant that does not have consent
-    """
-
-    consent = extract_consent_data(record)
-    print(f"CONSENT IS {consent} /n")
-
-    return consent
 
 def get_output_path():
     """
@@ -98,6 +91,7 @@ def get_output_path():
 def write_registration_csv(candidates):
     """
     Write registration data to CSV
+    Return: None
     """
     reg_csv_path = get_output_path()
 
@@ -116,6 +110,7 @@ def write_registration_csv(candidates):
 def main():
     """
     Build the candidate object and write csv
+    Return: None
     """
     print(f"extract_consent_data function: {extract_consent_data}")
     print(f"extract_consent_data module: {extract_consent_data.__module__}")

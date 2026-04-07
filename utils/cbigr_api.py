@@ -43,7 +43,8 @@ def authenticate():
 
 def fetch_candidates():
     """
-    Fetch candidates using authenticated session
+    Fetch candidate object from cbigr candidatesPlus endpoint 
+    using authenticated session
     """
 
     if not _SESSION or not _TOKEN:
@@ -59,7 +60,7 @@ def fetch_candidates():
 
 def get_candidates():
     """
-    Get the candidate list and extract data from each candidate dict
+    Transform the fetched candidate object
     Returns a list of candidate dictionaries with extracted fields
     """
     # Get the response object
@@ -105,56 +106,27 @@ def get_candidates():
     return extracted_candidates
 
 
-def extract_pscid_extid():
+def get_loris_ids():
     """
-    Make a dict with PSCID and ExtStudyID by filtering extractef_candidates
+    Make a dict of candID, PSCID, External Study Identifier
     Returns: dict
     """
 
     extracted_candidates = get_candidates()
     
-    pscid_extid = []
+    loris_ids = []
 
     for i in extracted_candidates:
+            candid = i['CandID']
             pscid = i['PSCID']
             ext_study_ids = i['ExtStudyID_Q1K']
 
             if ext_study_ids is not None or '':
                 record = {
+                    'candid': candid,
                     'pscid': pscid, 
                     'extid': ext_study_ids
                 }
-                pscid_extid.append(record)
+                loris_ids.append(record)
 
-    return pscid_extid
-
-
-
-# def delete_diagnosis(pscid, diagnosis_name):
-#     """DELETE a diagnosis"""
-#     global _session
-    
-#     try:
-#         payload = {'PSCID': pscid, 'Diagnosis': diagnosis_name}
-#         response = _session.delete(
-#             Config.CBIGR_DIAGNOSIS_URL,
-#             json=payload,
-#             headers=_get_headers(),
-#             timeout=10
-#         )
-        
-#         if response.status_code == 200:
-#             print(f"✓ Deleted {diagnosis_name} for {pscid}")
-#             return True
-#         else:
-#             print(f"✗ Failed: {response.status_code}")
-#             return False
-#     except Exception as e:
-#         print(f"✗ Error: {e}")
-#         return False
-
-
-    
-#     except Exception as e:
-#         print(f"✗ Error: {e}")
-#         return False
+    return loris_ids

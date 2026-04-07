@@ -59,12 +59,13 @@ def get_study_id(record):
 def get_record_id_external_id():
     """
     Extract record_id and study_id from fetch_identifiers
+    Return: dict
     """
 
     identifiers = fetch_identifiers()
 
     recordid_extid = {}
-    for i in identifiers():
+    for i in identifiers:
         record_id = i.get('record_id', '')
         ext_id = get_study_id(i) 
         recordid_extid[record_id] = ext_id
@@ -180,11 +181,11 @@ def fetch_family_relationship():
         'exportDataAccessGroups': 'false',
         'returnFormat': 'json',
         'events[0]' : 'intake_arm_1',
-        'fields[1]' : 'record_id', 
-        'fields[2]' : 'q1k_proband_id_1',
-        'fields[3]' : 'q1k_relative_idgenerated_1',
-        'fields[4]' : 'enr2_pro_rel_prob_2',
-        'fields[5]' : 'q1k_rel_proband_id'
+        'fields[0]' : 'record_id', 
+        'fields[1]' : 'q1k_proband_id_1',
+        'fields[2]' : 'q1k_relative_idgenerated_1',
+        'fields[3]' : 'enr2_pro_rel_prob_2',
+        'fields[4]' : 'q1k_rel_proband_id'
     }
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)
@@ -208,10 +209,11 @@ def fetch_session():
         'exportDataAccessGroups': 'false',
         'returnFormat': 'json',
         'events[0]' : 'intake_arm_1',
-        'fields[1]' : 'record_id', 
-        'fields[2]' : 'q1k_proband_id_1',
-        'fields[3]' : 'q1k_relative_idgenerated_1',
-        'fields[4]' : 'ev_status',
+        'fields[0]' : 'record_id', 
+        'fields[1]' : 'q1k_proband_id_1',
+        'fields[2]' : 'q1k_relative_idgenerated_1',
+        'fields[3]' : 'ev_status',
+        'fields[4]' : 'q1k_proband_yn_1',
         'fields[5]' : 'q1k_adminsite_1'
     }
 
@@ -222,6 +224,8 @@ def fetch_session():
 def get_sessions():
     """
     get cohorts and sites for all candidates for eventual
+    q1k_proband_yn 1= yes 0= no
+    ev_status 1=affected 2 = not affected
     db session inserts
     """
 
@@ -231,20 +235,43 @@ def get_sessions():
     for s in session_data:
         record_id = s.get("record_id")
         cohort_value = s.get("ev_status")
-        proband_value = s.get("")
-        
-        #get proband value as well
-        if proband_value == "" and cohort_value = "" or Null
-            cohort = "Affected"
+        proband_value = s.get("q1k_proband_yn")
+    
 
-        elif proband_value == "" and cohort_value == '0':
+        # if proband = 1 (YES), then this candidate is affected
+        if cohort_value == '1':
             cohort = 'Affected'
-        elif proband_value == "" and cohort_value == "1":
+        elif cohort_value == "2":
             cohort = 'Not Affected'
 
-        site = s.get("q1k_adminsite_1")
+        # set the proband to Affected
+        elif cohort_value == "" and proband_value == '1':
+            cohort = "Affected"
+        
+        else:
+            cohort = 'Unknown'
 
-        session_data[record_id] = {
+        site_value = s.get("q1k_adminsite_1")
+        if site_value == '1':
+            #HSJ
+            site = "Centre Hospitalier Universitaire Sainte-Justine"
+        elif site_value == '2':
+            #MHC
+            site = "Montreal Neurological Institute"
+        elif site_value == '3':
+            #NIM
+            site = "Hôpital Rivière-des-Prairies"
+        elif site_value == '4':
+            # OIM
+            site = "Douglas Mental Health Institute"
+        elif site_value == '5':
+            # SHR
+            site = "Centre Hospitalier Universitaire de Sherbrooke"
+        elif site_value == '6':
+            # GAT
+            site = "Children's Hospital of Eastern Ontario"
+        
+        sessions[record_id] = {
             "cohort": cohort, 
             "site": site
         } 

@@ -9,12 +9,66 @@ Returns:
 """
 from datetime import datetime
 from pathlib import Path
-from utils.both_api import get_diagnosis
-from utils.cbigr_api import authenticate
+from utils.redcap_api import fetch_diagnosis
+from utils.cbigr_api import authenticate, get_candidates
 from utils.config import Config
 
 _SESSION = None
 _TOKEN = None
+
+
+def get_diagnosis():
+    """
+    Extract diagnoses where value is '1' (Yes)
+    Returns: dict
+    """
+    records = fetch_diagnosis()
+    extracted_candidates = get_candidates()
+
+    diagnosis_mapping = {
+        'Autism Spectrum Disorder': 'reg_diag_asd',
+        'Intellectual Disability': 'reg_diag_intel',
+        'Attention Deficit Hyperactivity Disorder': 'reg_diag_adhd',
+        'Fetal Alcohol Syndrome Disorder': 'reg_diag_fas',
+        'Learning Disability': 'reg_diag_learn',
+        'Language and Communication Disorder': 'reg_diag_comm',
+        'Motor Disorder': 'reg_diag_motor',
+        'Hearing Disability': 'reg_diag_hearing',
+        'Visual Disability': 'diag_visual',
+        'Physical Disability': 'reg_diag_phys',
+        'Genetic Disorder': 'reg_diag_gene',
+        'Other': 'reg_diag_oth'
+    }
+
+    diagnoses = []
+
+    for r in records:
+        merged_id = get_study_id(r)
+
+        for c in extracted_candidates:
+            pscid = c.get('PSCID')
+            if c['ExtStudyID_Q1K'] == merged_id:
+
+                for name, field in diagnosis_mapping.items():
+                    if r.get(field) == '1':
+                        diagnoses.append({
+                            'PSCID': pscid,
+                            'Diagnosis': name,
+                            'Familial': None,  
+                            'Comment': 'Suspected Diagnosis'    
+                        })
+
+                    elif r.get(field) == '2':
+                        diagnoses.append({
+                            'PSCID': pscid,
+                            'Diagnosis': name,
+                            'Familial': None,
+                            'Comment' : 'Confirmed Diagnosis'
+                        })
+                break
+            
+    return diagnoses
+
 
 def get_output_path():
     """
