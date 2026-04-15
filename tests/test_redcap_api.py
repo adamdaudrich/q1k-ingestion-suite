@@ -11,8 +11,9 @@ from utils.redcap_api import (
     fetch_family_relationship,
     get_record_id_external_id,
     fetch_session,
-    get_sessions
 )
+
+from scripts.build_sessions import get_sessions
 from utils.config import Config
 from pprint import pprint
 
