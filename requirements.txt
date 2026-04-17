@@ -1,0 +1,21 @@
+bcrypt==4.3.0
+bic_util @ git+https://github.com/bic-mni/bic-mri-pipeline-util@c30c142768f45e96190520738cddc44fd6843a38
+certifi==2026.2.25
+cffi==1.17.1
+charset-normalizer==3.4.6
+cryptography==45.0.5
+git-filter-repo==2.47.0
+idna==3.11
+iniconfig==2.3.0
+mni_7t_dicom_to_bids @ git+https://github.com/bic-mni/mni-7t-dicom-to-bids@a84ab160589f137e337d7417cf4fb40ac8593ad6
+packaging==26.0
+paramiko==3.5.1
+pluggy==1.6.0
+pycparser==2.22
+pydicom==3.0.1
+Pygments==2.20.0
+PyNaCl==1.5.0
+pytest==9.0.2
+python-dotenv==1.2.2
+requests==2.33.1
+urllib3==2.6.3

@@ -61,8 +61,8 @@ def get_site_from_id(merged_id):
         'MHC': "Montreal Neurological Institute",
         'HSJ': "Centre Hospitalier Universitaire Sainte-Justine",
         'GAT': "Children's Hospital of Eastern Ontario",
-        'OIM': "Hôpital Rivière-des-Prairies",
-        'NIM': "Douglas Mental Health University Institute",
+        'NIM': "Hôpital Rivière-des-Prairies",
+        'OIM': "Douglas Mental Health University Institute",
         'SHR': "Centre Hospitalier Universitaire de Sherbrooke"
     }
 

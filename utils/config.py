@@ -21,6 +21,7 @@ class Config:
     REDCAP_TOKEN = os.getenv('REDCAP_TOKEN')
     REDCAP_URL = os.getenv('REDCAP_URL')
 
-    #bids 
+    #bids
+    TEST_BIDS = os.getenv('TEST_BIDS') 
     MERGED_BIDS = os.getenv('MERGED_BIDS')
     RENAMED_BIDS = os.getenv('RENAMED_BIDS')

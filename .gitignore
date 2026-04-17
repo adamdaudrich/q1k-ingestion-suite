@@ -7,6 +7,9 @@ tests/test_csv/2_consents.csv
 scripts/csv
 scripts/json
 
+# other
+utils/replacements.txt
+
 # Python cache
 __pycache__/
 *.pyc
@@ -18,4 +21,3 @@ __pycache__/
 # OS junk
 .DS_Store
 Thumbs.db
-
