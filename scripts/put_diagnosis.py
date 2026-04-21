@@ -10,6 +10,7 @@ Returns:
 from utils.get_diagnoses import get_diagnosis
 from utils.cbigr_api import authenticate
 from utils.config import Config
+from scripts.post_diagnosis import get_diagnosis
 
 _SESSION = None
 _TOKEN = None

@@ -7,37 +7,32 @@ for arg in "$@"; do
   [[ "$arg" == "--dry-run" ]] && DRY_RUN=true || ARGS+=("$arg")
 done
 
-MRI_DIR="${ARGS[0]%/}" EEG_DIR="${ARGS[1]%/}" TARGET_DIR="${ARGS[2]%/}"
-RSYNC_OPTS="-av --stats -h"
-$DRY_RUN && RSYNC_OPTS="-avn --itemize-changes --stats -h"
-
-mkdir -p "$TARGET_DIR"
-rsync $RSYNC_OPTS --exclude="participants.tsv" "$MRI_DIR/" "$TARGET_DIR/"
+EEG_DIR="${ARGS[0]%/}" TARGET_DIR="${ARGS[1]%/}"
+RSYNC_OPTS="-a"
+$DRY_RUN && RSYNC_OPTS="-an"
 
 for eeg_sub in "$EEG_DIR"/sub-*/; do
   sub=$(basename "$eeg_sub")
   ses="$eeg_sub/ses-01"
 
   if [[ -d "$TARGET_DIR/$sub" ]]; then
-    rsync $RSYNC_OPTS "$ses/eeg/" "$TARGET_DIR/$sub/ses-01/eeg/"
-    [[ -d "$ses/et" ]] && rsync $RSYNC_OPTS "$ses/et/" "$TARGET_DIR/$sub/ses-01/et/"
+    eeg_target="$TARGET_DIR/$sub/ses-01/eeg"
+    et_target="$TARGET_DIR/$sub/ses-01/et"
+
+    if [[ -d "$eeg_target" ]]; then
+      echo "Skipping $sub/ses-01/eeg — already exists"
+    else
+      $DRY_RUN && echo "Would insert eeg for $sub" || { echo "Inserting eeg for $sub"; rsync $RSYNC_OPTS "$ses/eeg/" "$eeg_target/"; }
+    fi
+
+    if [[ -d "$ses/et" ]]; then
+      if [[ -d "$et_target" ]]; then
+        echo "Skipping $sub/ses-01/et — already exists"
+      else
+        $DRY_RUN && echo "Would insert et for $sub" || { echo "Inserting et for $sub"; rsync $RSYNC_OPTS "$ses/et/" "$et_target/"; }
+      fi
+    fi
   else
-    rsync $RSYNC_OPTS "$eeg_sub/" "$TARGET_DIR/$sub/"
+    echo "Skipping $sub — not found in target (MRI not yet synced?)"
   fi
 done
-
-TSV="$TARGET_DIR/participants.tsv"
-if $DRY_RUN; then
-  echo "--- participants.tsv changes ---"
-  [[ ! -f "$TSV" ]] && echo "  Would create participants.tsv with header"
-  for sub_path in "$TARGET_DIR"/sub-*/; do
-    sub=$(basename "$sub_path")
-    grep -qx "$sub" "$TSV" 2>/dev/null || echo "  Would add: $sub"
-  done
-else
-  [[ ! -f "$TSV" ]] && echo "participant_id" > "$TSV"
-  for sub_path in "$TARGET_DIR"/sub-*/; do
-    sub=$(basename "$sub_path")
-    grep -qx "$sub" "$TSV" || echo "$sub" >> "$TSV"
-  done
-fi

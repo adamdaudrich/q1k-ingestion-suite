@@ -94,18 +94,18 @@ def rename_sub(bids_dir, matches, dry_run=True):
             else:
                 path.rename(path.parent / new_name)
 
-
 def main():
-    """
-    Rename all sub- and ses- level BIDS directories from subid to pscid
-    and ses-01 to SES_NAME.
-    """
     matches = match_ids()
+    
+    # Filter out already-renamed subjects
+    matches = [m for m in matches if Path(Config.MERGED_BIDS / m['subid']).exists()]
+    
+    if not matches:
+        print("All subjects already renamed.")
+        return
 
-    # rename ses first, then sub, from bottom up
-    rename_ses(Config.MERGED_BIDS)
-    rename_sub(Config.MERGED_BIDS, matches)
-
+    rename_ses(Config.MERGED_BIDS, dry_run=True)   # add dry_run=True
+    rename_sub(Config.MERGED_BIDS, matches, dry_run=True
 
 if __name__ == '__main__':
     main()

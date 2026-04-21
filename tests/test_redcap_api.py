@@ -14,6 +14,7 @@ from utils.redcap_api import (
 )
 
 from scripts.build_sessions import get_sessions
+from scripts.post_diagnoses import get_diagnosis
 from utils.config import Config
 from pprint import pprint
 
@@ -109,7 +110,7 @@ def test_fetch_diagnosis():
     for i in records[-3:]:
         print(i, end = '\n')
 
-def test_get_diagnoses():
+def test_get_diagnosis():
     """Test"""
 
     diagnoses = get_diagnosis()
@@ -118,7 +119,7 @@ def test_get_diagnoses():
     print(type(diagnoses))
     print(f"THE AMOUNT OF DIAGNOSES IS {len(diagnoses)}")
 
-    for i in diagnoses[:5]:
+    for i in diagnoses:
         print(i, end= '\n')
 
 def test_get_record_id_external_id():
@@ -187,6 +188,7 @@ if __name__ == "__main__":
     test_fetch_consents()
     test_fetch_registration()
     test_fetch_diagnosis()
+    test_get_diagnosis()
     test_get_record_id_external_id()
     test_fetch_family_relationship()
     test_get_family_relationships()
