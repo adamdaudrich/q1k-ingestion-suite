@@ -3,6 +3,7 @@ Configuration loader for API credentials
 """
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -23,5 +24,5 @@ class Config:
 
     #bids
     TEST_BIDS = os.getenv('TEST_BIDS') 
-    MERGED_BIDS = os.getenv('MERGED_BIDS')
-    RENAMED_BIDS = os.getenv('RENAMED_BIDS')
+    MERGED_BIDS = Path(os.getenv('MERGED_BIDS'))
+    RENAMED_BIDS = Path(os.getenv('RENAMED_BIDS'))

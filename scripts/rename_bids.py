@@ -1,31 +1,23 @@
 """
-Rename post-merged bids
+Rename post-merged bids into a new output directory (non-destructive)
 """
 
 from utils.cbigr_api import get_loris_ids
 from utils.config import Config
 from pathlib import Path
+import shutil
 import os
+import tempfile
 
 SES_NAME = 'ses-Q1KDeepPhenotyping01'
 
 
 def get_merged_bids():
-    """
-    Get a list of renamed bids for eventual comparison to PSCID 
-    from extracted_candidates
-    """
     merged_bids = {f for f in os.listdir(Config.MERGED_BIDS) if f.startswith('sub-')}
     return merged_bids
 
 
 def match_ids():
-    """
-    Associate the bids sub-type id with the CBIGR externalID
-    for the purpose of renaming the BIDS.
-
-    Returns list of dicts with keys: pscid, subid, extid
-    """
     loris_ids = get_loris_ids()
     merged_bids = get_merged_bids()
 
@@ -33,13 +25,10 @@ def match_ids():
     for i in loris_ids:
         pscid = i['pscid']
         extid = i['extid']
-        # ex Q1K-MHC-100119-P -> 0119P
         parts = extid.split('-')
         if len(parts) < 4:
             continue
-        #extid_truncated = extid[-6:]
-        extid_clean = parts[-2][-4:] + parts[-1] 
-        #ls extid_clean = extid_truncated.replace("-", "")
+        extid_clean = parts[-2][-4:] + parts[-1]
 
         for m in merged_bids:
             if m == 'sub-' + extid_clean:
@@ -52,60 +41,80 @@ def match_ids():
     return pscid_subid_extid
 
 
-def find_sub(bids_dir, subid):
-    """
-    Recursively find all paths in the bids_dir that contain subid.
-    Returns a sorted list of Path objects, deepest first (bottom-up).
-    """
-    bids_path = Path(bids_dir)
-    hits = sorted(bids_path.rglob(f'*{subid}*'), key=lambda p: len(p.parts), reverse=True)
-    return hits
+def apply_renames(name: str, subid: str, pscid: str) -> str:
+    """Apply both sub and ses renames to a file/dir name."""
+    name = name.replace(subid, f'sub-{pscid}')
+    name = name.replace('ses-01', SES_NAME)
+    return name
 
 
-def find_ses(bids_dir, sesid='ses-01'):
+def copy_and_rename(src_dir: Path, dest_dir: Path, matches: list, dry_run=True):
     """
-    Find all ses directories in all levels of the targeted bids_dir.
-    Returns a sorted list of Path objects, deepest first (bottom-up).
+    Copy the renamed files to a temp folder to complete the rename, 
+    then transfer to new folder
     """
-    bids_path = Path(bids_dir)
-    hits = sorted(bids_path.rglob(f'*{sesid}*'), key=lambda p: len(p.parts), reverse=True)
-    return hits
+    
+    # parents = true creates the parent paths to the eventual destination dir
+    # exist_ok = don't throw error if it already exists
+    dest_dir.mkdir(parents=True, exist_ok=True)
 
+    #break it down to just subid and pscid
+    subid_to_pscid = {m['subid']: m['pscid'] for m in matches}
 
-def rename_ses(bids_dir, dry_run=False):
-    """Rename all instances of ses-01 to SES_NAME."""
-    hits = find_ses(bids_dir)
-    for path in hits:
-        new_name = path.name.replace('ses-01', SES_NAME)
-        if dry_run:
-            print(f"{path}\n\t-> {path.parent / new_name}")
+    #iterdir is a Path method that lists everything, files and subdirectories, one deep
+    for item in src_dir.iterdir():
+        #checks if the current subid in matches matches the folder name
+        matched_subid = next((sid for sid in subid_to_pscid if item.name.startswith(sid)), None)
+
+        if matched_subid:
+            pscid = subid_to_pscid[matched_subid]
+            new_name = apply_renames(item.name, matched_subid, pscid)
         else:
-            path.rename(path.parent / new_name)
+            new_name = item.name
+
+        dest_path = dest_dir / new_name
+
+        if dry_run:
+            print(f"{item}\n\t-> {dest_path}")
+        else:
+            #creates temporary directory in the destination dir, deleted whent he block exits
+            with tempfile.TemporaryDirectory(dir=dest_dir) as tmp:
+                #build path for the item inside the temp directory
+                tmp_path = Path(tmp) / new_name
+                if item.is_dir():
+                    # call _copy_tree_renamed recursively
+                    _copy_tree_renamed(item, tmp_path, matched_subid, pscid if matched_subid else None)
+                else:
+                    shutil.copy2(item, tmp_path)
+                shutil.move(str(tmp_path), dest_path)
 
 
-def rename_sub(bids_dir, matches, dry_run=True):
-    """Rename all subid directories and files to their corresponding pscid."""
-    for match in matches:
-        hits = find_sub(bids_dir, match['subid'])
-        for path in hits:
-            new_name = path.name.replace(match['subid'], "sub-" + match['pscid'])
-            if dry_run:
-                print(f"{path}\n\t-> {path.parent / new_name}")
-            else:
-                path.rename(path.parent / new_name)
+def _copy_tree_renamed(src: Path, dest: Path, subid: str | None, pscid: str | None):
+    """Recursively copy a directory tree, renaming files and folders as we go."""
+    dest.mkdir(parents=True, exist_ok=True)
+    for item in src.iterdir():
+        new_name = apply_renames(item.name, subid, pscid) if subid and pscid else item.name
+        dest_item = dest / new_name
+        if item.is_dir():
+            _copy_tree_renamed(item, dest_item, subid, pscid)
+        else:
+            shutil.copy2(item, dest_item)
+
 
 def main():
     matches = match_ids()
-    
-    # Filter out already-renamed subjects
-    matches = [m for m in matches if Path(Config.MERGED_BIDS / m['subid']).exists()]
-    
+
+    # Filter out already-renamed subjects by comparinf the subid in MERGED folder
+    # to the pscid in RENAMED folder 
+    matches = [m for m in matches if Path(Config.MERGED_BIDS / m['subid']).exists()
+           and not Path(Config.RENAMED_BIDS / f"sub-{m['pscid']}").exists()]
+
     if not matches:
         print("All subjects already renamed.")
         return
 
-    rename_ses(Config.MERGED_BIDS, dry_run=True)   # add dry_run=True
-    rename_sub(Config.MERGED_BIDS, matches, dry_run=True
+    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=False)  # flip to False when ready
+
 
 if __name__ == '__main__':
     main()
