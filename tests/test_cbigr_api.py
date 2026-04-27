@@ -8,6 +8,7 @@ from utils.cbigr_api import (
     fetch_candidates,
     get_candidates,
     get_loris_ids,
+    get_duplicates
 )
 
 # from utils.bids import match_subid_to_pscid
@@ -81,25 +82,35 @@ def test_get_candidates():
     print(extracted_candidates[-1])
 
 
-def test_get_loris_ids():
+def test_get_duplicates():
     """
     Test
     """
-
-    loris_ids = get_loris_ids()
-    for i in loris_ids:
-        parts = i['extid'].split('-')
-        if len(parts) < 2:
-            print(i)
-    assert isinstance(loris_ids, list)
-    #assert isinstance(loris_ids, int)
-    # for i in loris_ids:
-    #     print(i)
-    print(f"THE NUMBER OF IDS IN CBIGR IS : {len(loris_ids)}")
-    print(loris_ids[0])
-    print(loris_ids[-1])
-
+    sorted_dup = get_duplicates()
+    for i in sorted_dup:
+        print(f'{i} is a duplicate')
+    
     return None
+
+# def test_get_loris_ids():
+#     """
+#     Test
+#     """
+
+#     loris_ids = get_loris_ids()
+#     for i in loris_ids:
+#         parts = i['extid'].split('-')
+#         if len(parts) < 2:
+#             print(i)
+#     assert isinstance(loris_ids, list)
+#     #assert isinstance(loris_ids, int)
+#     # for i in loris_ids:
+#     #     print(i)
+#     print(f"THE NUMBER OF IDS IN CBIGR IS : {len(loris_ids)}")
+#     print(loris_ids[0])
+#     print(loris_ids[-1])
+
+#     return None
 
 def test_match_subid_to_extid():
     """
@@ -153,3 +164,4 @@ if __name__ == "__main__":
     test_get_candidates()
     test_get_loris_ids()
     test_post_diagnosis()
+    test_get_duplicates()

@@ -26,26 +26,26 @@ def get_diagnosis():
     extracted_candidates = get_candidates()
 
     diagnosis_mapping = {
-        'Autism Spectrum Disorder': 'cfq_diag_asd_2',
-        'Intellectual Disability': 'cfq_diag_id_2',
-        'Attention Deficit Hyperactivity Disorder': 'cfq_diag_adhd_2',
-        'Fetal Alcohol Syndrome Disorder': 'cfq_diag_fasd_2',
-        'Learning Disorder': 'cfq_diag_ld_2',
-        'Language and Communication Disorder': 'cfq_diag_lcd_2',
-        'Motor Disorder': 'cfq_diag_md_2',
-        'Anxiety Disorder': 'cfq_ment_ad_2',
-        'Depression Disorder':'cfq_ment_dd_2',
-        'Bipolar Disorder': 'cfq_ment_bd_2',
-        'Obsessive Compulsive Disorder':'cfq_ment_ocd_2',
-        'Tourettes Syndrome': 'cfq_ment_ts_2',
-        'Psychosis Episodes': 'cfq_ment_psyep_2',
-        'Schizophrenia': 'cfq_ment_schizo_2',
-        'Substance Abuse': 'cfq_ment_sa_2',
-        'Epilepsy':'cfq_ment_epilepsy_2',
-        'Hearing Disability': 'cfq_ment_hearing_disability_2',
-        'Visual Disability': 'cfq_ment_visual_disability_2',
-        'Physical Disability': 'cfq_ment_physical_disability_2',
-        'Genetic Disorder': 'cfq_ment_genetic_disorder_2'
+        'Autism Spectrum Disorder': 'cfq_diag_asd',
+        'Intellectual Disability': 'cfq_diag_id',
+        'Attention Deficit Hyperactivity Disorder': 'cfq_diag_adhd',
+        'Fetal Alcohol Syndrome Disorder': 'cfq_diag_fasd',
+        'Learning Disorder': 'cfq_diag_ld',
+        'Language and Communication Disorder': 'cfq_diag_lcd',
+        'Motor Disorder': 'cfq_diag_md',
+        'Anxiety Disorder': 'cfq_ment_ad',
+        'Depression Disorder':'cfq_ment_dd',
+        'Bipolar Disorder': 'cfq_ment_bd',
+        'Obsessive Compulsive Disorder':'cfq_ment_ocd',
+        'Tourettes Syndrome': 'cfq_ment_ts',
+        'Psychosis Episodes': 'cfq_ment_psyep',
+        'Schizophrenia': 'cfq_ment_schizo',
+        'Substance Abuse': 'cfq_ment_sa',
+        'Epilepsy':'cfq_ment_epilepsy',
+        'Hearing Disability': 'cfq_ment_hearing_disability',
+        'Visual Disability': 'cfq_ment_visual_disability',
+        'Physical Disability': 'cfq_ment_physical_disability',
+        'Genetic Disorder': 'cfq_ment_genetic_disorder'
     }
 
     diagnoses = []

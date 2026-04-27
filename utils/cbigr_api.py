@@ -3,7 +3,7 @@ Get authentication token once
 """
 import requests
 from utils.config import Config
-
+from collections import Counter
 
 _SESSION = None
 _TOKEN = None
@@ -105,6 +105,19 @@ def get_candidates():
     
     return extracted_candidates
 
+def get_duplicates():
+    """
+    Get a list of the duplicate external ID's in CBIGR
+    """
+    extracted_candidates = get_candidates()
+
+    extids = [i['ExtStudyID_Q1K'] for i in extracted_candidates]
+    counts = Counter(extids)
+    duplicates = [extid for extid, count in counts.items() if count > 1 and extid is not None]
+
+    sorted_dup = sorted(duplicates)
+
+    return sorted_dup
 
 def get_loris_ids():
     """

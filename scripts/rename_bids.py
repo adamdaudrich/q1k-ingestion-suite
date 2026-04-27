@@ -74,6 +74,11 @@ def copy_and_rename(src_dir: Path, dest_dir: Path, matches: list, dry_run=True):
 
         dest_path = dest_dir / new_name
 
+        # skip if the pscid already exists in dest dir
+        if matched_subid and (dest_dir / f"sub-{pscid}").exists():
+            print(f"Skipping {matched_subid} -> sub-{pscid}: already exists in {dest_dir}")
+            continue
+
         if dry_run:
             print(f"{item}\n\t-> {dest_path}")
         else:
@@ -103,11 +108,6 @@ def _copy_tree_renamed(src: Path, dest: Path, subid: str | None, pscid: str | No
 
 def main():
     matches = match_ids()
-
-    # Filter out already-renamed subjects by comparinf the subid in MERGED folder
-    # to the pscid in RENAMED folder 
-    matches = [m for m in matches if Path(Config.MERGED_BIDS / m['subid']).exists()
-           and not Path(Config.RENAMED_BIDS / f"sub-{m['pscid']}").exists()]
 
     if not matches:
         print("All subjects already renamed.")
