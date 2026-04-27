@@ -46,6 +46,7 @@ def fetch_identifiers():
 
     return redcap_ids
 
+
 def get_study_id(record):
     """
     Extract, merge and format the study ID from REDcap required by CBIGR new_profile
@@ -55,6 +56,7 @@ def get_study_id(record):
     merged_id = proband_id or relative_id or ''
 
     return merged_id.replace('_', '-')
+
 
 def get_record_id_external_id():
     """
@@ -70,11 +72,40 @@ def get_record_id_external_id():
         ext_id = get_study_id(i) 
         recordid_extid[record_id] = ext_id
 
-    return recordid_extid    
+    return recordid_extid
+
+
+def fetch_handedness():
+    """Fetch the fields required for participants.tsv from REDCAP
+    fields:
+    participant_id<tab>species<tab>age<tab>sex<tab>handedness<tab>HED
+    NULL values are to br written : "n/a"
+    """
+        params = {
+        'token': REDCAP_TOKEN,
+        'content': 'record',
+        'action': 'export',
+        'format': 'json',
+        'type': 'flat',
+        'rawOrLabel': 'raw',
+        'rawOrLabelHeaders': 'raw',
+        'exportCheckboxLabel': 'false',
+        'exportSurveyFields': 'false',
+        'exportDataAccessGroups': 'false',
+        'returnFormat': 'json',
+        'events[0]' : 'phase_3',
+        'fields[1]' : 'record_id', 
+        'fields[2]' : 'eeg_participant_handedness'
+    }
+
+    response = requests.post(REDCAP_URL, data=params, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
 
 def fetch_registration():
     """Fetch registration data from REDCap API"""
-    params = {
+        params = {
         'token': REDCAP_TOKEN,
         'content': 'record',
         'action': 'export',
@@ -157,7 +188,7 @@ def fetch_diagnosis():
         'fields[9]': 'cfq_diag_md',
         'fields[10]': 'cfq_diag_other',
         'fields[11]': 'cfq_ment_ad',
-        'fields[12]': 'cfq_ment_dd',
+        'fields[12]': 'cfq_ment_dd',participant_tsv_fields
         'fields[13]': 'cfq_ment_bd',
         'fields[14]': 'cfq_ment_ocd',
         'fields[15]': 'cfq_ment_ts',
@@ -173,7 +204,7 @@ def fetch_diagnosis():
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)
     response.raise_for_status()
-    return response.json()
+    return response.json()participant_tsv_fields
 
 def fetch_family_relationship():
     """Fetch the Family relationship"""
