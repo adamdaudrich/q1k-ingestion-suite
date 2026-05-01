@@ -4,38 +4,63 @@ BIDS specification
 
 fields:
 participant_id<tab>species<tab>age<tab>sex<tab>handedness<tab>HED
-NULL values are to br written : "n/a"
+NULL values are to be written : "n/a"
 
 """
 
 from pathlib import Path
 import csv
 from utils.config import Config, 
-from utils. cbigr_api import get_candidates
+from utils.cbigr_api import get_candidates
 from scripts.build_candidates import get_personal_fields
-
+from scripts.build_sessions import get_sessions
 renamed_dir = Config.RENAMED_BIDS
 
 
-def get_participant_tsv_fields()
+def get_pscid_id_from_record_id()
+    
 
-
-# Get sex from REDcap
-personal_fields = get_personal_fields()
-sex = personal_fields['Sex']
-age = {what should we use to calculate age}
-handedness = 
-
-
-
-def get_handedness():
+def get_participant_tsv()
 """
-eeg_session_log eeg_participant_handedness 
-(values: 1=Right-handed, 2=Left_handed, 3=Ambidextrous, 4=N/A)
 """
+    
+    SPECIES = 'homo spaiens'
+    records = fetch_eeg_fields()
 
+    tsv = {}
 
+    for r in records:
+        #record_id
+        record_id = r.get['record_id']
+        
+        #age
+        age_value = r.get['eeg_age_years_testdate']
+        age = int(age_value)
 
+        #sex
+        sex_map = {'1': 'Female', '2': 'Male', '99': 'Other'}
+        sex_value = r.get('eeg_sex_birth') 
+        sex = sex_map.get(sex_value, 'n/a')
+
+        #handedness
+        handedness_value = 'eeg_participant_handedness'
+        handedness_map = {'1':'Right-handed', '2':'Left-handed','3':'Ambidextrous','4':'n/a'}
+
+        
+        tsv[record_id] = {
+            "species" : SPECIES,
+            "age" : age,
+            "sex" : sex,
+            "handedness" : handedness,
+            "strain" : 
+            "strain_md" :
+            "HED" :
+        }
+
+def get_cohort()
+"""
+"""
+    cbigr_candidates = get_candidates()
 
 
 def main()

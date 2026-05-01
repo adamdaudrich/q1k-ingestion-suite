@@ -11,6 +11,7 @@ from utils.redcap_api import (
     fetch_family_relationship,
     get_record_id_external_id,
     fetch_session,
+    fetch_eeg_fields
 )
 
 from scripts.build_sessions import get_sessions
@@ -182,6 +183,16 @@ def test_get_sessions():
 
     return None
 
+
+def test_fetch_participant_tsv():
+
+    tsv_values = fetch_participant_tsv()
+    assert tsv_values is not None
+    pprint(tsv_values)
+
+    return None
+
+
 if __name__ == "__main__":
     test_validate_token()
     test_fetch_identifiers()
@@ -194,4 +205,4 @@ if __name__ == "__main__":
     test_get_family_relationships()
     test_fetch_session()
     test_get_sessions()
- 
+    test_fetch_eeg_fields()

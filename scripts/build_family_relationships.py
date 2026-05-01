@@ -59,7 +59,7 @@ def get_family_relationships():
 
     family_rel_map = {
     '13':'half_sibling',
-    '9':'full_sibling',
+    '9':'biological_sibling',
     '2':'adoptive_mother',
     '6':'adoptive_father',
     '15':'adoptive_child',
