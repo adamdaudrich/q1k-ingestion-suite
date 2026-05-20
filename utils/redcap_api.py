@@ -234,9 +234,9 @@ def fetch_session():
     response.raise_for_status()
     return response.json()
 
-def fetch_eeg_fieldsv():
+def fetch_eeg_fields():
     """
-    
+    fetch the eeg_fields from REDCAP API
     """
     params = {
         'token': REDCAP_TOKEN,
@@ -251,11 +251,17 @@ def fetch_eeg_fieldsv():
         'exportDataAccessGroups': 'false',
         'returnFormat': 'json',
         'events[0]' : 'phase_3_arm_1',
-        'fields[0]' : 'record_id', 
-        'fields[2]' : 'eeg_age_years_testdate',
-        'fields[4]' : 'eeg_participant_handedness'
+        'fields[0]' : 'record_id',
+        'fields[1]' : 'q1k_proband_id_1',
+        'fields[2]' : 'q1k_relative_idgenerated_1',
+        'fields[3]' : 'eeg_age_years_testdate',
+        'fields[4]' : 'eeg_sex_birth',
+        'fields[5]' : 'eeg_participant_handedness'
     }
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)
     response.raise_for_status()
     return response.json()
+
+
+    

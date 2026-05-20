@@ -10,66 +10,98 @@ NULL values are to be written : "n/a"
 
 from pathlib import Path
 import csv
-from utils.config import Config, 
-from utils.cbigr_api import get_candidates
-from scripts.build_candidates import get_personal_fields
-from scripts.build_sessions import get_sessions
+from utils.config import Config
+# from utils.cbigr_api import get_candidates
+from utils.redcap_api import fetch_eeg_fields, get_study_id
+from utils.cbigr_api import get_loris_ids
+# from scripts.build_candidates import get_personal_fields
+# from scripts.build_sessions import get_sessions
 renamed_dir = Config.RENAMED_BIDS
 
 
-def get_pscid_id_from_record_id()
+def get_eeg_fields():
+    """
+    Build a dict containing the necessary fields for most detailed participant tsv possible
+    participant_id, age, sex, handedness
+    """
     
+    SPECIES = 'homo sapiens'
+    eeg_raw_data = fetch_eeg_fields()
 
-def get_participant_tsv()
-"""
-"""
-    
-    SPECIES = 'homo spaiens'
-    records = fetch_eeg_fields()
+    eeg_fields = {}
 
-    tsv = {}
+    for r in eeg_raw_data:
 
-    for r in records:
-        #record_id
-        record_id = r.get['record_id']
-        
-        #age
-        age_value = r.get['eeg_age_years_testdate']
-        age = int(age_value)
+        record_id = r.get('record_id')
+        age_value = r.get('eeg_age_years_testdate')
 
-        #sex
+        if age_value == '':
+            age = 'n/a'
+        else:
+            age = int(round(float(age_value)))
+
         sex_map = {'1': 'Female', '2': 'Male', '99': 'Other'}
         sex_value = r.get('eeg_sex_birth') 
         sex = sex_map.get(sex_value, 'n/a')
 
-        #handedness
-        handedness_value = 'eeg_participant_handedness'
         handedness_map = {'1':'Right-handed', '2':'Left-handed','3':'Ambidextrous','4':'n/a'}
+        handedness_value = r.get('eeg_participant_handedness')
+        handedness = handedness_map.get(handedness_value, 'n/a')
 
-        
-        tsv[record_id] = {
+        eeg_fields[record_id] = {
+            "participant_id": record_id,
             "species" : SPECIES,
             "age" : age,
             "sex" : sex,
-            "handedness" : handedness,
-            "strain" : 
-            "strain_md" :
-            "HED" :
+            "handedness" : handedness
         }
 
-def get_cohort()
-"""
-"""
-    cbigr_candidates = get_candidates()
+    return eeg_fields
 
+# def get_cohort():
+#     """
+#     """
+#     cbigr_candidates = get_candidates()
 
-def main()
+#     return None
 
-with open("participants.tsv", "w", newline="") as f:
-    writer = csv.writer(f, delimiter="\t")
-    writer.writerow(["participant_id", "species", "age", "sex", "handedness", "HED"])
+# def get_output_path():
+#     """
+#     Get the output CSV path and ensure directory exists
+#     """
+#     output_dir = Config.RENAMED_BIDS
+#     filename = 'participants.tsv'
     
-    for item in sorted(renamed_dir.iterdir()):
-        if item.is_dir():
-            value = item.name.removeprefix("sub-")  # or item.is_file(), depending on your structure
-            writer.writerow([value, "..."])
+#     return output_dir / filename
+
+
+def replace_record_id():
+    """
+    replace the record_id with the PSCID
+    """
+
+def write_participant_tsv(tsv_dict):
+    """
+    Write the dict to the CSV
+    """
+
+    with open("participants.tsv", "w", newline="") as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerow(["participant_id", "species", "age", "sex", "handedness"])
+        
+        for item in sorted(renamed_dir.iterdir()):
+            if item.is_dir():
+                value = item.name.removeprefix("sub-")  # or item.is_file(), depending on your structure
+                writer.writerow([value, "..."])
+
+
+def main():
+    """
+    Main function to write csv
+    """
+    eeg_fields = get_eeg_fields()
+    
+    write_participant_tsv(eeg_fields)
+
+if __name__ == "__main__":
+    main()

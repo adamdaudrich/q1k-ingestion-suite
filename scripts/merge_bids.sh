@@ -13,7 +13,7 @@ $DRY_RUN && RSYNC_OPTS="-an"
 
 for eeg_sub in "$EEG_DIR"/sub-*/; do
   sub=$(basename "$eeg_sub")
-  ses="$eeg_sub/ses-01"
+  ses="{$eeg_sub}ses-01"
 
   if [[ -d "$TARGET_DIR/$sub" ]]; then
     eeg_target="$TARGET_DIR/$sub/ses-01/eeg"
@@ -33,6 +33,6 @@ for eeg_sub in "$EEG_DIR"/sub-*/; do
       fi
     fi
   else
-    echo "Skipping $sub — not found in target (MRI not yet synced?)"
+    $DRY_RUN && echo "Would copy entire $sub from EEG" || { echo "Copying entire $sub from EEG"; rsync $RSYNC_OPTS "$eeg_sub" "$TARGET_DIR/$sub/"; }
   fi
 done

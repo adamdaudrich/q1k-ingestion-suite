@@ -92,25 +92,25 @@ def test_get_duplicates():
     
     return None
 
-# def test_get_loris_ids():
-#     """
-#     Test
-#     """
+def test_get_loris_ids():
+    """
+    Test
+    """
 
-#     loris_ids = get_loris_ids()
-#     for i in loris_ids:
-#         parts = i['extid'].split('-')
-#         if len(parts) < 2:
-#             print(i)
-#     assert isinstance(loris_ids, list)
-#     #assert isinstance(loris_ids, int)
-#     # for i in loris_ids:
-#     #     print(i)
-#     print(f"THE NUMBER OF IDS IN CBIGR IS : {len(loris_ids)}")
-#     print(loris_ids[0])
-#     print(loris_ids[-1])
+    loris_ids = get_loris_ids()
+    for i in loris_ids:
+        parts = i['extid'].split('-')
+        if len(parts) < 2:
+            print(i)
+    assert isinstance(loris_ids, list)
+    #assert isinstance(loris_ids, int)
+    # for i in loris_ids:
+    #     print(i)
+    print(f"THE NUMBER OF IDS IN CBIGR IS : {len(loris_ids)}")
+    print(loris_ids[0])
+    print(loris_ids[-1])
 
-#     return None
+    return None
 
 def test_match_subid_to_extid():
     """

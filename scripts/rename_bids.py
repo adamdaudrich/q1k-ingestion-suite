@@ -113,7 +113,7 @@ def main():
         print("All subjects already renamed.")
         return
 
-    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=True)  # flip to False when ready
+    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=False)  # flip to False when ready
 
 
 if __name__ == '__main__':

@@ -3,7 +3,8 @@ Test Scripts
 """
 
 from scripts.build_candidates import get_personal_fields, get_study_id, get_site_from_id, get_output_path, write_registration_csv
-from scripts.rename_bids import get_merged_bids, match_ids, find_ses, find_sub, rename_ses, rename_sub 
+from scripts.rename_bids import get_merged_bids, match_ids
+from scripts.build_sub_ids import get_external_ids, get_external_id_sub_id
 from utils.config import Config
 
 def test_build_candidates():
@@ -39,7 +40,7 @@ def test_build_candidates():
 
     return None
 
-def get_merged_bids():
+def test_get_merged_bids():
     """
     Test
     """
@@ -106,6 +107,37 @@ def test_rename_sub():
     rename_sub(Config.TEST_BIDS, matches, dry_run=True)
 
 
+def test_get_external_ids():
+    """
+    Test
+    """
+    external_ids = get_external_ids()
+
+
+    assert get_external_ids() is not None
+    assert len(external_ids) > 0
+    #print (external_ids)
+    print(type(external_ids))
+    print(f"AMOUNT OF EXTERNAL IDS in REDCAP IS: {len(external_ids)}")
+    
+
+    return None
+
+def test_get_external_id_sub_id():
+    """
+    Test
+    """
+    external_id_sub_ids = get_external_id_sub_id()
+
+    assert external_id_sub_ids is not None
+    assert len(external_id_sub_ids) > 0
+
+    keys = list(external_id_sub_ids.keys())
+    #print(keys[0], external_id_sub_ids[keys[0]])
+    #print(keys[-1], external_id_sub_ids[keys[-1]])
+    print(f"THE AMOUNT OF SUBIDS FOUND IN CBIGR EXTERNAL IDS Is: {len(external_id_sub_ids)}")
+
+
 def test_build_consents():
     """
     Test
@@ -134,8 +166,10 @@ def test_post_diagnoses():
 
 if __name__ == "__main__":
     test_build_candidates()
+    test_get_merged_bids()
     test_match_ids()
-    find_ses()
     test_find_sub()
-    rename_ses()
-    rename_sub()
+    test_find_ses()
+    test_rename_ses()
+    test_rename_sub()
+    test_get_external_id_sub_id()

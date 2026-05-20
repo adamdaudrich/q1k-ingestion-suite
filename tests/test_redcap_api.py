@@ -13,6 +13,7 @@ from utils.redcap_api import (
     fetch_session,
     fetch_eeg_fields
 )
+from scripts.update_participant_tsv import get_eeg_fields
 
 from scripts.build_sessions import get_sessions
 from scripts.post_diagnoses import get_diagnosis
@@ -183,12 +184,19 @@ def test_get_sessions():
 
     return None
 
+def test_fetch_eeg_fields():
 
-def test_fetch_participant_tsv():
+    eeg_fields = fetch_eeg_fields()
 
-    tsv_values = fetch_participant_tsv()
-    assert tsv_values is not None
-    pprint(tsv_values)
+    print(eeg_fields[0])
+
+    return None
+
+def test_get_eeg_fields():
+
+    eeg_fields = get_eeg_fields()
+    assert eeg_fields is not None
+    pprint(eeg_fields)
 
     return None
 
