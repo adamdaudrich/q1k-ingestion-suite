@@ -8,6 +8,8 @@ from pathlib import Path
 import shutil
 import os
 import tempfile
+import json
+import csv
 
 SES_NAME = 'ses-Q1KDeepPhenotyping01'
 
@@ -41,12 +43,54 @@ def match_ids():
     return pscid_subid_extid
 
 
+def reidentify_string(value: str, subid: str, pscid: str) -> str:
+    """Replace subid pattern in a string value (for file contents)."""
+    if not isinstance(value, str):
+        return value
+    return value.replace(subid, f'sub-{pscid}').replace('ses-01', SES_NAME)
+
+
+def reidentify_in_dict(obj, subid: str, pscid: str):
+    """Recursively walk a JSON-decoded structure and replace identifiers in values."""
+    if isinstance(obj, dict):
+        return {k: reidentify_in_dict(v, subid, pscid) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [reidentify_in_dict(item, subid, pscid) for item in obj]
+    elif isinstance(obj, str):
+        return reidentify_string(obj, subid, pscid)
+    return obj
+
+
+def handle_tsv(src: Path, dest: Path, subid: str, pscid: str):
+    """Copy TSV, replacing identifiers in every cell (tab-delimited)."""
+    with src.open('r', newline='', encoding='utf-8') as fin, \
+         dest.open('w', newline='', encoding='utf-8') as fout:
+        reader = csv.reader(fin, delimiter='\t')
+        writer = csv.writer(fout, delimiter='\t')
+        for row in reader:
+            writer.writerow([reidentify_string(cell, subid, pscid) for cell in row])
+
+def handle_csv(src: Path, dest: Path, subid: str, pscid: str):
+    """Copy CSV, replacing identifiers in every cell (comma-delimited)."""
+    with src.open('r', newline='', encoding='utf-8') as fin, \
+         dest.open('w', newline='', encoding='utf-8') as fout:
+        reader = csv.reader(fin)
+        writer = csv.writer(fout)
+        for row in reader:
+            writer.writerow([reidentify_string(cell, subid, pscid) for cell in row])
+
+def handle_json(src: Path, dest: Path, subid: str, pscid: str):
+    """Copy JSON, recursively replacing identifiers in all string values."""
+    data = json.loads(src.read_text(encoding='utf-8'))
+    data = reidentify_in_dict(data, subid, pscid)
+    dest.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
+
+
 def apply_renames(name: str, subid: str, pscid: str) -> str:
     """Apply both sub and ses renames to a file/dir name."""
     name = name.replace(subid, f'sub-{pscid}')
     name = name.replace('ses-01', SES_NAME)
     return name
-
 
 def copy_and_rename(src_dir: Path, dest_dir: Path, matches: list, dry_run=True):
     """
@@ -102,6 +146,21 @@ def _copy_tree_renamed(src: Path, dest: Path, subid: str | None, pscid: str | No
         dest_item = dest / new_name
         if item.is_dir():
             _copy_tree_renamed(item, dest_item, subid, pscid)
+
+        elif subid and pscid:
+            ext = item.suffix.lower()
+            # Check double extension for .nii.gz
+            if ext == '.gz' and item.stem.endswith('.nii'):
+                # NIfTI: just copy (header scrubbing not implemented; add nibabel call here if needed)
+                shutil.copy2(item, dest_item)
+            elif ext == '.tsv':
+                handle_tsv(item, dest_item, subid, pscid)
+            elif ext == '.csv':
+                handle_csv(item, dest_item, subid, pscid)
+            elif ext == '.json':
+                handle_json(item, dest_item, subid, pscid)
+            else:
+                shutil.copy2(item, dest_item)
         else:
             shutil.copy2(item, dest_item)
 
