@@ -2,9 +2,11 @@
 Test Scripts
 """
 
-from scripts.build_candidates import get_personal_fields, get_study_id, get_site_from_id, get_output_path, write_registration_csv
+from scripts.build_candidates import get_personal_fields, get_study_id, get_site_from_id
 from scripts.rename_bids import get_merged_bids, match_ids
 from scripts.build_sub_ids import get_external_ids, get_external_id_sub_id
+from scripts.post_diagnoses import get_diagnosis
+from scripts.build_sessions import get_sessions
 from utils.config import Config
 
 def test_build_candidates():
@@ -120,7 +122,6 @@ def test_get_external_ids():
     print(type(external_ids))
     print(f"AMOUNT OF EXTERNAL IDS in REDCAP IS: {len(external_ids)}")
     
-
     return None
 
 def test_get_external_id_sub_id():
@@ -137,6 +138,18 @@ def test_get_external_id_sub_id():
     #print(keys[-1], external_id_sub_ids[keys[-1]])
     print(f"THE AMOUNT OF SUBIDS FOUND IN CBIGR EXTERNAL IDS Is: {len(external_id_sub_ids)}")
 
+def test_get_sessions():
+    """
+    Test
+    """
+    sessions = get_sessions()
+
+    # First N items
+    dict(list(sessions.items())[:5])
+
+    # Or just iterate limited
+    for k, v in list(sessions.items())[:5]:
+        print(k, v)
 
 def test_build_consents():
     """
@@ -159,10 +172,17 @@ def test_cbigr_redcap_unmatched():
     Test
     """
 
-def test_post_diagnoses():
+def test_get_diagnosis():
     """
     Test
+
     """
+    diagnoses = get_diagnosis()
+
+    assert diagnoses is not None
+    print(type(diagnoses))
+    print(f"The AMOUNT of Diagnoses is {len(diagnoses)}")
+
 
 if __name__ == "__main__":
     test_build_candidates()
@@ -173,3 +193,6 @@ if __name__ == "__main__":
     test_rename_ses()
     test_rename_sub()
     test_get_external_id_sub_id()
+    test_get_sessions()
+    test_get_diagnosis()
+    

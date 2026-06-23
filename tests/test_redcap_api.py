@@ -10,11 +10,11 @@ from utils.redcap_api import (
     fetch_diagnosis,
     fetch_family_relationship,
     get_record_id_external_id,
-    fetch_session,
+    fetch_sessions,
+    get_study_id,
     fetch_eeg_fields
 )
 from scripts.update_participant_tsv import get_eeg_fields
-
 from scripts.build_sessions import get_sessions
 from scripts.post_diagnoses import get_diagnosis
 from utils.config import Config
@@ -163,11 +163,11 @@ def test_get_family_relationships():
     print(f'THE AMOUNT OF FAMILIES IS: {len(relationships)}')
     print(relationships)
 
-def test_fetch_session():
+def test_fetch_sessions():
     """
     Get a jsonified response object of the sessions per candidate
     """
-    fetch = fetch_session()
+    fetch = fetch_sessions()
 
     assert fetch is not None
     assert len(fetch) > 0
@@ -180,7 +180,7 @@ def test_get_sessions():
     sessions = get_sessions()
     assert sessions is not None
     assert len(sessions) > 0
-    pprint(sessions)
+    print(len(sessions))
 
     return None
 
@@ -200,6 +200,16 @@ def test_get_eeg_fields():
 
     return None
 
+def test_get_study_id():
+    '''
+    test
+
+    '''
+    records = fetch_identifiers()
+
+    for r in records:
+        id = get_study_id(r)
+        print(id, end='\n')
 
 if __name__ == "__main__":
     test_validate_token()
@@ -211,6 +221,6 @@ if __name__ == "__main__":
     test_get_record_id_external_id()
     test_fetch_family_relationship()
     test_get_family_relationships()
-    test_fetch_session()
+    test_fetch_sessions()
     test_get_sessions()
     test_fetch_eeg_fields()

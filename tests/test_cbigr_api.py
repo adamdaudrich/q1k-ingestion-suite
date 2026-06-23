@@ -78,8 +78,10 @@ def test_get_candidates():
     assert len(extracted_candidates) > 0
     print(type(extracted_candidates))
     print(f' TOTAL Accessed Candidates: {len(extracted_candidates)}')
-    print(extracted_candidates[0])
-    print(extracted_candidates[-1])
+
+    for c in extracted_candidates:
+        print(c, end = '\n')
+    # print(extracted_candidates[-1])
 
 
 def test_get_duplicates():

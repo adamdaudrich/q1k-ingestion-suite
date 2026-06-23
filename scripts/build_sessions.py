@@ -5,7 +5,7 @@ needed for batch session renaming in CBIGR
 from datetime import datetime
 import csv
 from pathlib import Path
-from utils.redcap_api import get_study_id, fetch_session   
+from utils.redcap_api import get_study_id, fetch_sessions   
 
 def get_sessions():
     """
@@ -15,11 +15,12 @@ def get_sessions():
     db session inserts
     """
 
-    session_data = fetch_session()
+    session_data = fetch_sessions()
 
     sessions = {}
     for s in session_data:
         q1k_id = get_study_id(s)
+        record_id = s.get("record_id")
         cohort_value = s.get("ev_status")
     
 
@@ -56,7 +57,7 @@ def get_sessions():
             # GAT
             site = "Children's Hospital of Eastern Ontario"
         
-        sessions[q1k_id] = {
+        sessions[record_id] = {
             "Cohort": cohort, 
             "Site": site
         } 

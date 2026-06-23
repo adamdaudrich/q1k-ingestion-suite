@@ -81,6 +81,13 @@ def handle_csv(src: Path, dest: Path, subid: str, pscid: str):
 
 def handle_json(src: Path, dest: Path, subid: str, pscid: str):
     """Copy JSON, recursively replacing identifiers in all string values."""
+    content = src.read_text(encoding='utf-8')
+    
+    if not content.strip():
+        print(f"WARNING: empty JSON file, copying as-is: {src}")
+        shutil.copy2(src, dest)
+        return
+    
     data = json.loads(src.read_text(encoding='utf-8'))
     data = reidentify_in_dict(data, subid, pscid)
     dest.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
@@ -172,7 +179,7 @@ def main():
         print("All subjects already renamed.")
         return
 
-    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=False)  # flip to False when ready
+    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=True)  # flip to False when ready
 
 
 if __name__ == '__main__':
