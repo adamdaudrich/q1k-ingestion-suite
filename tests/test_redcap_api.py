@@ -12,9 +12,7 @@ from utils.redcap_api import (
     get_record_id_external_id,
     fetch_sessions,
     get_study_id,
-    fetch_eeg_fields
 )
-from scripts.update_participant_tsv import get_eeg_fields
 from scripts.build_sessions import get_sessions
 from scripts.post_diagnoses import get_diagnosis
 from utils.config import Config
@@ -94,7 +92,8 @@ def test_fetch_registration():
     assert len(records) > 0
     print(type(records))
     print(f'THE TOTAL NUMBER OF RECORDS IS {len(records)}')
-
+    print(records[0])
+    
 def test_fetch_diagnosis():
     """Test"""
 
@@ -188,7 +187,7 @@ def test_fetch_eeg_fields():
 
     eeg_fields = fetch_eeg_fields()
 
-    print(eeg_fields[0])
+    print(eeg_fields)
 
     return None
 
@@ -223,4 +222,3 @@ if __name__ == "__main__":
     test_get_family_relationships()
     test_fetch_sessions()
     test_get_sessions()
-    test_fetch_eeg_fields()

@@ -30,7 +30,8 @@ def fetch_identifiers():
     'events[0]' : 'intake_arm_1',
     'fields[0]' : 'record_id',
     'fields[1]' : 'q1k_proband_id_1',
-    'fields[2]' : 'q1k_relative_idgenerated_1'}
+    'fields[2]' : 'q1k_relative_idgenerated_1'
+    }
 
     redcap_ids_resp = requests.post(REDCAP_URL, data = redcap_ids_fetch, timeout = 10)
     redcap_ids_data = redcap_ids_resp.json()
@@ -39,8 +40,8 @@ def fetch_identifiers():
     for j in redcap_ids_data:
         record = {
             'record_id': j['record_id'],
-            'q1k_proband_id_1': j['q1k_proband_id_1'].replace('_', '-').strip(),
-            'q1k_relative_idgenerated_1': j['q1k_relative_idgenerated_1'].replace('_', '-').strip(),
+            # 'q1k_proband_id_1': j['q1k_proband_id_1'].replace('_', '-').strip(),
+            # 'q1k_relative_idgenerated_1': j['q1k_relative_idgenerated_1'].replace('_', '-').strip(),
         }
         redcap_ids.append(record)
 
@@ -73,7 +74,6 @@ def get_record_id_external_id():
         recordid_extid[record_id] = ext_id
 
     return recordid_extid
-
 
 def fetch_registration():
     """Fetch registration data from REDCap API"""
@@ -204,7 +204,7 @@ def fetch_family_relationship():
     response.raise_for_status()
     return response.json()
 
-def fetch_session():
+def fetch_sessions():
     """ 
     Fetch site, ev_status, and ids of the participant
     """
@@ -229,14 +229,45 @@ def fetch_session():
         'fields[5]' : 'q1k_adminsite_1'
     }
 
+    response = requests.post(REDCAP_URL, data=params, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+
+def fetch_bulk_p2():
+    """
+    Fetch phase 2 fields from REDCap API
+    """
+    params = {
+        'token': REDCAP_TOKEN,
+        'content': 'record',
+        'action': 'export',
+        'format': 'json',
+        'type': 'flat',
+        'rawOrLabel': 'raw',
+        'rawOrLabelHeaders': 'raw',
+        'exportCheckboxLabel': 'false',
+        'exportSurveyFields': 'false',
+        'exportDataAccessGroups': 'false',
+        'returnFormat': 'json',
+        'events[0]' : 'intake_arm_1',
+        'fields[1]' : 'enr2_pro_sex',
+        'fields[2]' : 'q1k_sitechoice_1',
+        'fields[3]' : 'ev_status',
+        'fields[4]' : 'record_id', 
+        'fields[5]' : 'q1k_proband_id_1',
+        'fields[6]' : 'q1k_relative_idgenerated_1'
+    }
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)
     response.raise_for_status()
     return response.json()
 
-def fetch_eeg_fields():
+
+def fetch_bulk_p3():
     """
-    fetch the eeg_fields from REDCAP API
+    fetch phase 3 fields from REDCAP API
     """
     params = {
         'token': REDCAP_TOKEN,
@@ -251,17 +282,19 @@ def fetch_eeg_fields():
         'exportDataAccessGroups': 'false',
         'returnFormat': 'json',
         'events[0]' : 'phase_3_arm_1',
-        'fields[0]' : 'record_id',
-        'fields[1]' : 'q1k_proband_id_1',
-        'fields[2]' : 'q1k_relative_idgenerated_1',
-        'fields[3]' : 'eeg_age_years_testdate',
-        'fields[4]' : 'eeg_sex_birth',
-        'fields[5]' : 'eeg_participant_handedness'
+        'fields[1]' : 'eeg_age_years_testdate',
+        'fields[2]' : 'eeg_sex_birth',
+        #1=left, 2=right, 3=ambi, 4=unknown 
+        'fields[3]' : 'eeg_participant_handedness',
+        'fields[4]' : 'icf_form_phase_2_complete',
+        'fields[5]' : 'record_id'
     }
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)
     response.raise_for_status()
     return response.json()
 
+
+    
 
     
