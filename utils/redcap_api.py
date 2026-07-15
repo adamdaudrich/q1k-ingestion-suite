@@ -264,7 +264,6 @@ def fetch_bulk_p2():
     response.raise_for_status()
     return response.json()
 
-
 def fetch_bulk_p3():
     """
     fetch phase 3 fields from REDCAP API
@@ -282,11 +281,10 @@ def fetch_bulk_p3():
         'exportDataAccessGroups': 'false',
         'returnFormat': 'json',
         'events[0]' : 'phase_3_arm_1',
-        'fields[1]' : 'eeg_age_years_testdate',
         'fields[2]' : 'eeg_sex_birth',
         #1=left, 2=right, 3=ambi, 4=unknown 
         'fields[3]' : 'eeg_participant_handedness',
-        'fields[4]' : 'icf_form_phase_2_complete',
+        'fields[4]' : 'icf_form_phase_3_complete',
         'fields[5]' : 'record_id'
     }
 

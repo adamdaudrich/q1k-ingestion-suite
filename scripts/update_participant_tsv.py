@@ -1,107 +1,197 @@
 """
-Fetches and writes non-private information into participant.tsv as per
-BIDS specification
+Builds a hashmap of Q1K-specific participant.tsv fields:
+participant_id,cohort,site,species,sex,handedness
 
-fields:
-participant_id<tab>species<tab>age<tab>sex<tab>handedness<tab>HED
-NULL values are to be written : "n/a"
-
+outputs a TSV file
 """
 
-from pathlib import Path
+from datetime import datetime
 import csv
-from utils.config import Config
-# from utils.cbigr_api import get_candidates
-from utils.redcap_api import fetch_eeg_fields, get_study_id
-from utils.cbigr_api import get_loris_ids
-# from scripts.build_candidates import get_personal_fields
-# from scripts.build_sessions import get_sessions
-renamed_dir = Config.RENAMED_BIDS
+from pathlib import Path
+from utils.redcap_api import fetch_bulk_p2, fetch_bulk_p3, get_study_id # pylint: disable=import-error,wrong-import-position
+import json
 
-
-def get_eeg_fields():
+def get_consented_candidates():
     """
-    Build a dict containing the necessary fields for most detailed participant tsv possible
-    participant_id, age, sex, handedness
-    """
+    get the records of ONLY consented candidates from phase 3
+    this is a safeguard measure because most of them are consented
     
-    SPECIES = 'homo sapiens'
-    eeg_raw_data = fetch_eeg_fields()
+    returns: array of dicts [{'record_id':'__', 'redcap_event_name': '__', 'redcap_repeat_instrument': '__', 
+    'redcap_repeat_instance': '__', 'eeg_participant_handedness': '__'}
+    """
+    # phase 3 records
 
-    eeg_fields = {}
+    p3_records = fetch_bulk_p3()
 
-    for r in eeg_raw_data:
+    p3 = []
+    for record in p3_records:
 
-        record_id = r.get('record_id')
-        age_value = r.get('eeg_age_years_testdate')
+        #filter them down to just those who completed mri or eeg or both
+        #if mri_test = yes or eeg_test = yes
 
-        if age_value == '':
-            age = 'n/a'
-        else:
-            age = int(round(float(age_value)))
+        consent_value = record.get('icf_form_phase_3_complete','')
+        # 2=yes
+        if consent_value == '2':
+            
+            p3_fields = { 
+                'record_id': record.get('record_id', ''),
+                'handedness': record.get('eeg_participant_handedness', ''),
+            }
 
-        sex_map = {'1': 'Female', '2': 'Male', '99': 'Other'}
-        sex_value = r.get('eeg_sex_birth') 
-        sex = sex_map.get(sex_value, 'n/a')
+            p3.append(p3_fields)
+    # print(p3)
+    return p3
 
-        handedness_map = {'1':'Right-handed', '2':'Left-handed','3':'Ambidextrous','4':'n/a'}
-        handedness_value = r.get('eeg_participant_handedness')
-        handedness = handedness_map.get(handedness_value, 'n/a')
+def get_p2(p3):
+    """
+    """
+    #make hash map
+    p2_records = fetch_bulk_p2()
+    p3_record_ids = {r.get('record_id', '') for r in p3}
 
-        eeg_fields[record_id] = {
-            "participant_id": record_id,
-            "species" : SPECIES,
-            "age" : age,
-            "sex" : sex,
-            "handedness" : handedness
-        }
+    p2 = []
 
-    return eeg_fields
+    for record in p2_records:
+        study_id = get_study_id(record)
 
-# def get_cohort():
-#     """
-#     """
-#     cbigr_candidates = get_candidates()
+        if record.get('record_id') in p3_record_ids:
 
-#     return None
+            p2_fields = {
+                'record_id' : record.get('record_id',''),
+                'participant_id' : study_id,
+                'cohort' : record.get('ev_status'),
+                'site' : get_site_from_id(study_id),       
+                'species' : 'homo sapiens',
+                'sex' : get_sex(record),    
+            }
+            
+            p2.append(p2_fields)
+    #print(json.dumps(p2, indent=2))
+    return p2
 
-# def get_output_path():
-#     """
-#     Get the output CSV path and ensure directory exists
-#     """
-#     output_dir = Config.RENAMED_BIDS
-#     filename = 'participants.tsv'
+
+def merge(p3, p2):
+    """
+    merge hash map of fields required for a complete q1k participant.tsv. This includes
+    participant_id,cohort,species,age_at_eeg_testing,age_at_mri_testing,sex,handedness
+    from the phase 3 event from redcap 
+    """
+
+    # promote the record_id to "key" pointing to the former dict
+
+    p3_lookup = {r['record_id']: r for r in p3}
+
+    merged = []
+    for record in p2:
+        p3_data = p3_lookup.get(record['record_id'])
+
+        if p3_data:  # only include if a match exists in p3
+            merged.append({
+                **record,    # all p2 fields
+                **p3_data,   # all p3 fields, joined on record_id
+            })
+    print(json.dumps(merged, indent=2))
+    return merged
+
+# helper functions
+
+def get_study_id(record):
+    """
+    Extract the study ID from the records provided by 
+    """
+    proband_id = record.get('q1k_proband_id_1', '')
+    relative_id = record.get('q1k_relative_idgenerated_1', '')
+    merged_id = proband_id or relative_id or ''
+
+    return merged_id.replace('_', '-')
+
+
+def get_sex(record):
+    """
+    Extract personal info from REDcap required by CBIGR new_profile 
+    """
+
+    sex = ''
+    sex_value = record.get('enr2_pro_sex', '')
+    if sex_value == '1':
+        sex = 'Female'
+    elif sex_value == '2':
+        sex = 'Male'
+    elif sex_value == '99':
+        sex = 'Unknown'
+    elif sex_value =='':
+        sex = 'Unknown'
+
+    return sex
+
+def get_site_from_id(merged_id):
+    """
+    Extract the site required by CBIGR new_profile from study ID substring
+    Return: str
+    """
+    if len(merged_id) < 7:
+        return ''
     
-#     return output_dir / filename
+    site_code = merged_id[4:7]
+    site_map = {
+        'MHC': "Montreal Neurological Institute",
+        'HSJ': "Centre Hospitalier Universitaire Sainte-Justine",
+        'GAT': "Children's Hospital of Eastern Ontario",
+        'NIM': "Hôpital Rivière-des-Prairies",
+        'OIM': "Douglas Mental Health University Institute",
+        'SHR': "Centre Hospitalier Universitaire de Sherbrooke"
+    }
 
+    return site_map.get(site_code, '')
 
-def replace_record_id():
+def get_output_path():
     """
-    replace the record_id with the PSCID
+    Get the output CSV path and ensure directory exists
     """
+    # Define output directory relative to script
+    script_dir = Path(__file__).parent
+    output_dir = script_dir / 'tsv'
+    
+    # Create directory if it doesn't exist
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-def write_participant_tsv(tsv_dict):
-    """
-    Write the dict to the CSV
-    """
+    timestamp = datetime.now().strftime('%Y-%m-%d')
+    base_name = 'participants'
+    filename = f'{base_name}_{timestamp}.tsv'
+    
+    # Return the full file path
+    return output_dir / filename
 
-    with open("participants.tsv", "w", newline="") as f:
-        writer = csv.writer(f, delimiter="\t")
-        writer.writerow(["participant_id", "species", "age", "sex", "handedness"])
-        
-        for item in sorted(renamed_dir.iterdir()):
-            if item.is_dir():
-                value = item.name.removeprefix("sub-")  # or item.is_file(), depending on your structure
-                writer.writerow([value, "..."])
+# write the tsv
+def write_tsv(merged, output_path):
+    fieldnames = ['participant_id', 'cohort', 'site', 'species', 'sex', 'handedness']
 
+    with open(output_path, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+        writer.writeheader()
+        for record in merged:
+            writer.writerow({
+                'participant_id': record['participant_id'],
+                'cohort': record['cohort'],
+                'site': record['site'],
+                'species': record['species'],
+                'sex': record['sex'],
+                'handedness': record['handedness'],
+            })
+
+    print(f"✅ TSV written to: {output_path}")
 
 def main():
     """
-    Main function to write csv
+    Main function to build and write the Q1K participant TSV
     """
-    eeg_fields = get_eeg_fields()
-    
-    write_participant_tsv(eeg_fields)
+    p3 = get_consented_candidates()
+    p2 = get_p2(p3)
+    merged = merge(p3, p2)
+
+    output_path = get_output_path()
+
+    write_tsv(merged, output_path)
 
 if __name__ == "__main__":
     main()

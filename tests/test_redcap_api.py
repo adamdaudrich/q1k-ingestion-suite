@@ -11,6 +11,7 @@ from utils.redcap_api import (
     fetch_family_relationship,
     get_record_id_external_id,
     fetch_sessions,
+    fetch_bulk_p2,
     get_study_id,
 )
 from scripts.build_sessions import get_sessions
@@ -183,28 +184,24 @@ def test_get_sessions():
 
     return None
 
-def test_fetch_eeg_fields():
+def test_fetch_bulk_p2():
 
-    eeg_fields = fetch_eeg_fields()
+    p2 = fetch_bulk_p2()
 
-    print(eeg_fields)
+    assert p2 is not None
+    assert len(p2) > 0
 
-    return None
-
-def test_get_eeg_fields():
-
-    eeg_fields = get_eeg_fields()
-    assert eeg_fields is not None
-    pprint(eeg_fields)
+    print(p2)
 
     return None
+
 
 def test_get_study_id():
     '''
     test
 
     '''
-    records = fetch_identifiers()
+    records = fetch_bulk_p2()
 
     for r in records:
         id = get_study_id(r)
@@ -220,5 +217,6 @@ if __name__ == "__main__":
     test_get_record_id_external_id()
     test_fetch_family_relationship()
     test_get_family_relationships()
+    test_fetch_bulk_p2()
     test_fetch_sessions()
     test_get_sessions()
