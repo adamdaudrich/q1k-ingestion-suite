@@ -281,11 +281,12 @@ def fetch_bulk_p3():
         'exportDataAccessGroups': 'false',
         'returnFormat': 'json',
         'events[0]' : 'phase_3_arm_1',
+        'fields[1]' : 'mri_acquisition_checklist_complete',
         'fields[2]' : 'eeg_sex_birth',
-        #1=left, 2=right, 3=ambi, 4=unknown 
         'fields[3]' : 'eeg_participant_handedness',
         'fields[4]' : 'icf_form_phase_3_complete',
-        'fields[5]' : 'record_id'
+        'fields[5]' : 'record_id',
+        'fields[6]' : 'eeget_session_log_complete'
     }
 
     response = requests.post(REDCAP_URL, data=params, timeout=10)

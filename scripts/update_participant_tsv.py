@@ -11,10 +11,10 @@ from pathlib import Path
 from utils.redcap_api import fetch_bulk_p2, fetch_bulk_p3, get_study_id # pylint: disable=import-error,wrong-import-position
 import json
 
-def get_consented_candidates():
+def get_imaging():
     """
-    get the records of ONLY consented candidates from phase 3
-    this is a safeguard measure because most of them are consented
+    get the records of ONLY candidates from phase 3 that have done mri or eeg
+    this is to constrain the participants to just those in BIDS dataset
     
     returns: array of dicts [{'record_id':'__', 'redcap_event_name': '__', 'redcap_repeat_instrument': '__', 
     'redcap_repeat_instance': '__', 'eeg_participant_handedness': '__'}
@@ -29,17 +29,20 @@ def get_consented_candidates():
         #filter them down to just those who completed mri or eeg or both
         #if mri_test = yes or eeg_test = yes
 
-        consent_value = record.get('icf_form_phase_3_complete','')
+        mri_acquisition_complete_value = record.get('mri_acquisition_checklist_complete','')
+        print(f'MRI COMPLETE IS: {mri_acquisition_complete_value}, end = \n')
+        eeget_log_complete_value = record.get('eeget_session_log_complete','')
+
         # 2=yes
-        if consent_value == '2':
+        if mri_acquisition_complete_value == '2' or eeget_log_complete_value == '2':
             
             p3_fields = { 
                 'record_id': record.get('record_id', ''),
-                'handedness': record.get('eeg_participant_handedness', ''),
+                'handedness': get_handedness(record)
             }
 
             p3.append(p3_fields)
-    # print(p3)
+    #print(json.dumps(p3)[0:3])
     return p3
 
 def get_p2(p3):
@@ -144,6 +147,26 @@ def get_site_from_id(merged_id):
 
     return site_map.get(site_code, '')
 
+def get_handedness(record):
+    """
+    #1=left, 2=right, 3=ambi, 4=unknown 
+    """
+
+    value = record.get('eeg_participant_handedness', ''),
+    if value:
+        if value == '1':
+            translated_value = 'left'
+        elif value == '2':
+            translated_value = 'right'
+        elif value == '3':
+            translated_value = 'ambidextrous'
+        elif value == '4':
+            translated_value = 'unknown'
+    else: 
+        translated_value = 'unknown'
+    
+    return translated_value
+
 def get_output_path():
     """
     Get the output CSV path and ensure directory exists
@@ -185,7 +208,7 @@ def main():
     """
     Main function to build and write the Q1K participant TSV
     """
-    p3 = get_consented_candidates()
+    p3 = get_imaging()
     p2 = get_p2(p3)
     merged = merge(p3, p2)
 
