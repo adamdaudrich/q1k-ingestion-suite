@@ -23,30 +23,36 @@ def match_ids():
     merged_bids = get_merged_bids()
 
     pscid_subid_extid = []
+    skipped = []
     for i in loris_ids:
-        if i['pscid'] in Config.DUPLICATE_PSCIDS:
+        pscid = i['pscid']
+        extid = i['extid']
+
+        #split the externalID for eventual bids id 
+        parts = extid.split('-')
+        if len(parts) < 4:
+            continue
+        #construct the bids id last 4 digits of part [-2] + the family member
+        extid_clean = parts[-2][-4:] + parts[-1]
+        subid = 'sub-' + extid_clean
+
+        if subid not in merged_bids:
+            #print(f"{subid} has no bids")
             continue
 
-        else:
-            pscid = i['pscid']
-            extid = i['extid']
-
-            #split the externalID for eventual bids id 
-            parts = extid.split('-')
-            if len(parts) < 4:
-                continue
-            #construct the bids id last 4 digits of part [-2] + the family member
-            extid_clean = parts[-2][-4:] + parts[-1]
+        if pscid in Config.DUPLICATE_PSCIDS:
+            print(f"Skipping {pscid} because it is a duplicate")
+            continue
 
             # for each of the not-yet-renamed named bids, if it 
             # relates to the curr loris_id
-            for m in merged_bids:
-                if m == 'sub-' + extid_clean:
-                    pscid_subid_extid.append({
-                        'pscid': pscid,
-                        'subid': m,
-                        'extid': extid
-                    })
+            # for m in merged_bids:
+            #     if m == 'sub-' + extid_clean:
+        pscid_subid_extid.append({
+            'pscid': pscid,
+            'subid': subid,
+            'extid': extid
+        })
 
     return pscid_subid_extid
 
