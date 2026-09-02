@@ -13,7 +13,6 @@ import csv
 
 SES_NAME = 'ses-Q1KDeepPhenotyping01'
 
-
 def get_merged_bids():
     merged_bids = {f for f in os.listdir(Config.MERGED_BIDS) if f.startswith('sub-')}
     return merged_bids
@@ -25,20 +24,29 @@ def match_ids():
 
     pscid_subid_extid = []
     for i in loris_ids:
-        pscid = i['pscid']
-        extid = i['extid']
-        parts = extid.split('-')
-        if len(parts) < 4:
+        if i['pscid'] in Config.DUPLICATE_PSCIDS:
             continue
-        extid_clean = parts[-2][-4:] + parts[-1]
 
-        for m in merged_bids:
-            if m == 'sub-' + extid_clean:
-                pscid_subid_extid.append({
-                    'pscid': pscid,
-                    'subid': m,
-                    'extid': extid
-                })
+        else:
+            pscid = i['pscid']
+            extid = i['extid']
+
+            #split the externalID for eventual bids id 
+            parts = extid.split('-')
+            if len(parts) < 4:
+                continue
+            #construct the bids id last 4 digits of part [-2] + the family member
+            extid_clean = parts[-2][-4:] + parts[-1]
+
+            # for each of the not-yet-renamed named bids, if it 
+            # relates to the curr loris_id
+            for m in merged_bids:
+                if m == 'sub-' + extid_clean:
+                    pscid_subid_extid.append({
+                        'pscid': pscid,
+                        'subid': m,
+                        'extid': extid
+                    })
 
     return pscid_subid_extid
 

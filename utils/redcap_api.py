@@ -40,8 +40,8 @@ def fetch_identifiers():
     for j in redcap_ids_data:
         record = {
             'record_id': j['record_id'],
-            # 'q1k_proband_id_1': j['q1k_proband_id_1'].replace('_', '-').strip(),
-            # 'q1k_relative_idgenerated_1': j['q1k_relative_idgenerated_1'].replace('_', '-').strip(),
+            'q1k_proband_id_1': j['q1k_proband_id_1'].replace('_', '-').strip(),
+            'q1k_relative_idgenerated_1': j['q1k_relative_idgenerated_1'].replace('_', '-').strip(),
         }
         redcap_ids.append(record)
 
@@ -294,6 +294,71 @@ def fetch_bulk_p3():
     return response.json()
 
 
-    
+def fetch_date_taken():
+    """
+    fetch the test date for each instrument
 
-    
+    abasiii_05 : abas0_5_today
+    abasiii_521 : abas5_21_today
+    abasiii_1889 : abas18_89_today
+    ados_module_toddler : ados_module_toddler_def_text
+    ados_module_1 : ados_module_1_def_text
+    ados_module_2 : ados_module_2_def_text
+    ados_module_3 : ados_module_3_def_text
+    ados_module_4 : ados_mod4_today_day
+    aseba_abcl_1859 : aseba_abcl_date
+    aseba_asr_1859 : asr18_59_todaydate
+    aseba_cbcl_155 : cbcl_pre_date
+    aseba_cbcl_618 : aseba_cbcl_date
+    aseba_oabcl_6090 : aseba_cbc?????
+    aseba_oasr_6090 : oasr60_90_date
+    bayley4 : bailey_testdate
+    developmental_history_questionnaire :
+    eeget_session_log : eeg_et_today_date
+    evt3: evt3_date
+    family_background_questionnaire : 
+    general_health_form : ghf_date
+    general_health_form_generic_testing_cnv_1 : gt_cnv_reviewer_date
+    general_health_form_generic_testing_cnv_2
+    general_health_form_generic_testing_cnv_3
+    general_health_form_generic_testing_csv_4
+    general_health_form_generic_testing_csv_5
+    general_health_form_generic_testing_snv_1
+    general_health_form_generic_testing_snv_2
+    general_health_form_generic_testing_snv_3
+    general_health_form_height_weight_head
+    general_health_form_medication_and_treatements_1 : ghf_med_reviewer_date
+    general_health_form_medication_and_treatements_2
+    general_health_form_medication_and_treatements_3
+    general_health_form_medication_and_treatements_4
+    general_health_form_medication_and_treatements_5
+    general_health_form_medication_and_treatements_6
+    general_health_form_medication_and_treatements_7
+    general_health_form_medication_and_treatements_8
+    general_health_form_medication_and_treatements_9
+    general_health_form_medication_and_treatements_10
+    general_health_form_medication_and_treatements_11
+    general_health_form_medication_and_treatements_12
+    general_health_form_medication_and_treatements_13
+    general_health_form_medication_and_treatements_14
+    general_health_form_medication_and_treatements_15
+    general_health_form_medication_and_treatements_16
+    general_health_form_medication_and_treatements_17
+    introduction_to_questionnaires
+    leiter3_sum : leiter_3_date
+    mri_aqcuisition_checklist :
+    mri_safety_questionnaire
+    parents_siblings_and_children_in_family_quest
+    ppvt5 : ppvt5_date
+    sample_tracking : track_date
+    scq_418 : scq_date
+    srs_adult_other_relative_19 : srs_older_today
+    srs_adult_selfreport_19_phase_2 :  or srs_asr_today_p2
+    srs_preschool : srs_prescho_today
+    srs_preschool_2545 :
+    srs_school_age_418 : srs4_18_today
+    waiscv_scoring : wais_date
+    wiscv scoring: wisc_date
+    wppsiiv_record_form_ages_23 : wippsi23_test_date
+    wppsiiv_record_form_ages_47 : wppsi_47_date 
+    """

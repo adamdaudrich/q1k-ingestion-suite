@@ -26,3 +26,4 @@ class Config:
     TEST_BIDS = os.getenv('TEST_BIDS') 
     MERGED_BIDS = Path(os.getenv('MERGED_BIDS'))
     RENAMED_BIDS = Path(os.getenv('RENAMED_BIDS'))
+    DUPLICATE_BIDS = os.getenv('DUPLICATE_PSCIDS')
