@@ -61,7 +61,7 @@ def build_cohort_lookup():
     for s in sessions:
         cohort_value = s.get('ev_status')
         q1k_id = get_study_id(s)
-        bids_id = transform_q1k_to_bids(q1k_id)
+        truncated_id = transform_q1k_to_bids(q1k_id)
 
         if cohort_value == '1':
             cohort = 'Affected'
@@ -72,7 +72,7 @@ def build_cohort_lookup():
         else:
             cohort = None
 
-        lookup[bids_id] = cohort
+        lookup[truncated_id] = cohort
 
     return lookup
 
@@ -81,7 +81,9 @@ def get_cohort(bids_id, lookup):
     """
     0(1) cohort lookup for a given bids_id
     """
-
+    #this looksup the bids_id in lookup table which contains the 
+    #equivalent truncated_id extracted from get_sessions
+    
     return lookup.get(bids_id)
 
 
