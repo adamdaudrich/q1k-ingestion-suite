@@ -112,7 +112,7 @@ def write_tsv(tsv, output_path):
         writer.writeheader()
         for i in tsv:
             writer.writerow({
-                'participant_id': i['participant_id'],
+                'participant_id': i['bids_id'],
                 'cohort': i['cohort']
             })
 
