@@ -56,6 +56,24 @@ def match_ids():
 
     return pscid_subid_extid
 
+def reidentify_string_multi(value: str, subid_to_pscid: dict) -> str:
+    """Like reidentify_string, but checks against every known subid->pscid pair.
+    Used for participants"""
+    if not isinstance(value, str):
+        return value
+    for subid, pscid in subid_to_pscid.items():
+        if subid in value:
+            value = value.replace(subid, f'sub-{pscid}')
+    return value
+
+def handle_participants_tsv(src: Path, dest: Path, subid_to_pscid: dict):
+    """Copy participants.tsv, replacing each row's subject id via the full mapping."""
+    with src.open('r', newline='', encoding='utf-8') as fin, \
+         dest.open('w', newline='', encoding='utf-8') as fout:
+        reader = csv.reader(fin, delimiter='\t')
+        writer = csv.writer(fout, delimiter='\t')
+        for row in reader:
+            writer.writerow([reidentify_string_multi(cell, subid_to_pscid) for cell in row])
 
 def reidentify_string(value: str, subid: str, pscid: str) -> str:
     """Replace subid pattern in a string value (for file contents)."""
@@ -113,7 +131,7 @@ def apply_renames(name: str, subid: str, pscid: str) -> str:
     name = name.replace('ses-01', SES_NAME)
     return name
 
-def copy_and_rename(src_dir: Path, dest_dir: Path, matches: list, dry_run=True):
+def copy_and_rename(src_dir: Path, dest_dir: Path, matches: list, dry_run=False):
     """
     Copy the renamed files to a temp folder to complete the rename, 
     then transfer to new folder
@@ -154,6 +172,8 @@ def copy_and_rename(src_dir: Path, dest_dir: Path, matches: list, dry_run=True):
                 if item.is_dir():
                     # call _copy_tree_renamed recursively
                     _copy_tree_renamed(item, tmp_path, matched_subid, pscid if matched_subid else None)
+                elif item.name == 'participants.tsv':
+                    handle_participants_tsv(item, tmp_path, subid_to_pscid)
                 else:
                     shutil.copy2(item, tmp_path)
                 shutil.move(str(tmp_path), dest_path)
@@ -193,7 +213,7 @@ def main():
         print("All subjects already renamed.")
         return
 
-    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=True)  # flip to False when ready
+    copy_and_rename(Config.MERGED_BIDS, Config.RENAMED_BIDS, matches, dry_run=False)  # flip to False when ready
 
 
 if __name__ == '__main__':
